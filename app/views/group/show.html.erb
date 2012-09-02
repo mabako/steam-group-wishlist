@@ -1,0 +1,64 @@
+<script type="text/javascript">
+
+var loaded = 0;
+var members = [];
+var games = [];
+
+function printgames() {
+  var obj = $('#games');
+  
+  obj.html('');
+  
+  var gamey = [];
+  for(var key in games) gamey.push([key, games[key]]);
+  
+  gamey.sort(function(a, b){
+    return (a[1].length < b[1].length) ? 1 : (a[1].length > b[1].length) ? -1 : 0;
+  });
+  
+  gamey.map(function(game){
+    var members = '';
+    for(var i = 0; i < game[1].length; ++ i) {
+      members += ' <a href="http://steamcommunity.com/profiles/'+game[1][i][0]+'">'+game[1][i][1]+'</a>'; 
+    }
+    $('#games').append('<li><strong>'+game[0]+' ('+game[1].length+')</strong>: '+members+'</li>');
+  });
+}
+
+function fetchMember() {
+  if(members.length == 0) return;
+  
+  var member = members.shift();
+  $.ajax({
+    dataType: 'json',
+    success: function(data) {
+      var user = data[0];
+      data[1].map(function(game) {
+        if(games[game] + "" === 'undefined') {
+          games[game] = [[member, user]];
+        } else {
+          games[game].push([member, user]);
+        }
+      });
+      printgames();
+      
+      $('#membersLoaded').text(++loaded);
+      fetchMember();
+    },
+    url: '/api/' + member + '.json'
+  });
+}
+
+$.ajax({
+  dataType: 'json',
+  success: function(data) {
+    members = data;
+    $('#membersTotal').text(members.length);
+    fetchMember();
+  },
+  url: '/group/<%= params[:id] %>.json'
+});
+</script>
+Loading members... <span id="membersLoaded">0</span> of <span id="membersTotal">0</span>
+<ul id="games">
+</ul>
