@@ -4,14 +4,17 @@ class GroupController < ApplicationController
   def show
     respond_to do |format|
       format.json {
-        doc = Nokogiri::XML(open("http://steamcommunity.com/groups/#{params[:id]}/memberslistxml/?xml=1").read)
-        
-        @members = []
-        doc.search('members/steamID64').each do |id|
-          @members << id.content
+        members = Rails.cache.fetch("group_#{params[:id]}", :expires_in => 1.hour) do
+          doc = Nokogiri::XML(open("http://steamcommunity.com/groups/#{params[:id]}/memberslistxml/?xml=1").read)
+          
+          members = []
+          doc.search('members/steamID64').each do |id|
+            members << id.content
+          end
+          members
         end
         
-        render :json => @members
+        render :json => members
       }
       format.html
     end
