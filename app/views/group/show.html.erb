@@ -19,7 +19,7 @@ function printgames() {
   gamey.map(function(game){
     var members = '';
     for(var i = 0; i < game[1].length; ++ i) {
-      members += ' <a href="http://steamcommunity.com/profiles/'+game[1][i][0]+'">'+game[1][i][1]+'</a>'; 
+      members += ' <a href="http://steamcommunity.com/profiles/'+game[1][i][0]+'" target="_blank">'+game[1][i][1]+'</a>'; 
     }
     $('#games').append('<li><strong>'+game[0]+' ('+game[1].length+')</strong>: '+members+'</li>');
   });
@@ -43,6 +43,8 @@ function fetchMember() {
       printgames();
       
       $('#membersLoaded').text(++loaded);
+    },
+    complete: function() {
       fetchMember();
     },
     url: '/api/' + member + '.json'
@@ -59,6 +61,7 @@ $.ajax({
   url: '/group/<%= params[:id] %>.json'
 });
 </script>
-Loading members... <span id="membersLoaded">0</span> of <span id="membersTotal">0</span>
+Loading members... <span id="membersLoaded">0</span> of <span id="membersTotal">0</span>, go drink a coffee or have sex while this is (trying) to do anything. Don't get your hopes up!
+
 <ul id="games">
 </ul>

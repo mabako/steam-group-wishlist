@@ -2,7 +2,7 @@ require 'open-uri'
 
 class ApiController < ApplicationController
   def show
-    data = Rails.cache.fetch("wishlist_#{params[:id]}", :expires_in => 1.hour) do
+    data = Rails.cache.fetch("wishlist_#{params[:id]}", :expires_in => 4.hours) do
       url = "http://steamcommunity.com/profiles/#{params[:id]}/wishlist?cc=us"
       doc = Nokogiri::HTML(open(url).read)
       
