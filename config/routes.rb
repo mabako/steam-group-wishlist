@@ -25,7 +25,7 @@ SteamWishlists::Application.routes.draw do
   #     end
   #   end
   resources :api, :only => :show, :id => /\d{17}/
-  resources :group, :only => :show, :id => /[A-Za-z0-9\-]+/
+  resources :group, :only => :show, :id => /[A-Za-z0-9\-\_]+/
   
   # Sample resource route with sub-resources:
   #   resources :products do
