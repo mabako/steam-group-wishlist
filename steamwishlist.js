@@ -1,3 +1,6 @@
+#!/bin/env node
+console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
+
 var app = require('express.io')()
   , xml2js = require('xml2js').parseString
   , request = require('request')
@@ -14,11 +17,19 @@ function fetchBase(url, func) {
 }
 
 function memberlistUpdate(req, page) {
-  fetchBase('http://steamcommunity.com/groups/' + req.data + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
-    if(err)
+  // numeric group id? they have different urls
+  var url = ('' + parseInt(req.data, 10)).length == req.data.length ? ('gid/' + req.data) : ('groups/' + req.data);
+  fetchBase('http://steamcommunity.com/' + url + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
+    if(err) {
+      console.log(err);
       return;
+    }
 
     xml2js(content, function(err, res) {
+      if(err || !res) {
+        console.log(err);
+        return;
+      }
       res = res.memberList;
 
       req.io.emit('m', res.members[0].steamID64);
@@ -81,7 +92,7 @@ app.get('/group/:name', function(req, res) {
 
 // Redirect the homepage to somewhere else
 app.get('/', function(req, res) {
-  res.redirect('/ToastyG');
+  res.redirect('/tower-of-god');
 });
 
 // Static files
@@ -98,10 +109,10 @@ app.get('/*', function(req, res) {
   res.sendfile(__dirname + '/client.html');
 });
 
-var port = process.env.PORT || 5000;
-app.listen(port, function() {
-  console.log("Listening on " + port);
-});
+var ip = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1'
+var port = process.env.OPENSHIFT_INTERNAL_PORT || process.env.PORT || 8080;
+app.listen(port, ip);
+console.log('Lets listen on ' + ip + ':' + port);
 
 // Clear cached apps once in a bluemoon
 setInterval(function() {

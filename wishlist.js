@@ -1,5 +1,5 @@
 $(function() {
-  io = io.connect()
+  io = io.connect(window.location.origin == 'http://swl.mabako.net' ? 'http://swl.mabako.net:8000' : null);
 
   // Emit ready event.
   io.emit('Hi-diddly-ho, neighborino', window.location.pathname.substr(1)); 
@@ -86,6 +86,6 @@ $(function() {
   });
 
   function createGame(id, data) {
-    $('#games').append('<div id="g' + id + '"><a href="http://store.steampowered.com/app/' + id + '" target="_blank"><img src="' + data.image + '"/></a><div><div class="cnt">0</div><div class="pr">' + data.price + '</div><div class="n"><a href="http://store.steampowered.com/app/' + id + '" target="_blank">' + data.name + '</a></div><div class="ppl"></div></div></div>');
+    $('#games').append('<div id="g' + id + '"><a href="http://store.steampowered.com/app/' + id + '" target="_blank"><img src="' + data.image + '"/></a><div class="r"><div class="cnt">0</div><div class="pr">' + data.price + '</div><div class="n"><a href="http://store.steampowered.com/app/' + id + '" target="_blank">' + data.name + '</a></div><div class="ppl"></div></div></div>');
   }
 });

@@ -1,6 +1,6 @@
 {
   "name": "steam-group-wishlist",
-  "version": "0.2.0",
+  "version": "0.2.0-2",
   "dependencies": {
     "express.io": "1.1.x",
     "xml2js": "0.2.x",
@@ -8,7 +8,11 @@
     "request": "2.21.x"
   },
   "engines": {
-    "node": "0.10.x",
-    "npm": "1.2.x"
+    "node": ">= 0.6.0",
+    "npm": ">= 1.0.0"
+  },
+  "main": "steamwishlist.js",
+  "scripts": {  
+    "start": "node steamwishlist.js"
   }
 }
