@@ -1,0 +1,14 @@
+{
+  "name": "steam-group-wishlist",
+  "version": "0.2.0",
+  "dependencies": {
+    "express.io": "1.1.x",
+    "xml2js": "0.2.x",
+    "cheerio": "0.11.x",
+    "request": "2.21.x"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  }
+}

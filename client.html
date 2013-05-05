@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <title>Steam Group Wishlist</title>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+      .cnt, #people, .pr, .n {
+        font-family: 'Roboto Slab', sans-serif;
+      }
+      .ppl {
+        font-family: 'Arial';
+      }
+      .ppl a, .n a {
+        color: #000;
+        text-decoration: none;
+      }
+      .cnt, .pr {
+        float: left;
+      }
+      .cnt, .pr, .n {
+        padding-right: 0.5em;
+        padding-left: 0.5em;
+      }
+      .n {
+        display: inline;
+      }
+      img {
+        float: left;
+        padding-right: 5px;
+      }
+      #games > div {
+        clear: both;
+        padding-top: 5px;
+      }
+      .cnt {
+        background: #87def3;
+      }
+      .n {
+        background: #eee;
+      }
+      .pr {
+        background: #fcffad;
+      }
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="/sort.js"></script>
+    <script src="/wishlist.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div id="people">
+      This is maybe the new Steam Group Wishlist. Feedback may or may not be sent to 'kt' on SG.
+    </div>
+    <div id="games">
+    </div>
+  </body>
+</html>
