@@ -11,10 +11,11 @@ $(function() {
   var apps = {};
   var curr = {};
 
-  function processCurrentMember() {
-    var linktext = '<a href="http://steamcommunity.com/profiles/' + curr.profile + '/" target="_blank">' + curr.name + '</a>';
-    for(var i = 0; i < curr.games.length; ++ i) {
-      var game = curr.games[i];
+  function processCurrentMember(data) {
+    processNext();
+    var linktext = '<a href="http://steamcommunity.com/profiles/' + data.profile + '/" target="_blank">' + data.name + '</a>';
+    for(var i = 0; i < data.games.length; ++ i) {
+      var game = data.games[i];
       var obj = $('#g' + game);
       $('.cnt', obj).text(parseInt($('.cnt', obj).text()) + 1);
       
@@ -26,7 +27,6 @@ $(function() {
       }
     }
     sortStuff();
-    processNext();
   }
   
   function sortStuff() {
@@ -45,11 +45,11 @@ $(function() {
       }
     }
     
-    curr = data;
     if(toFetch.length > 0) {
-      io.emit('games?', toFetch);
+      curr[data.profile] = data;
+      io.emit('games?', {fetch: toFetch, profile: data.profile});
     } else {
-      processCurrentMember()
+      processCurrentMember(data);
     }
   }
 
@@ -78,11 +78,13 @@ $(function() {
   });
 
   io.on('games!', function(data) {
-    for(var i in data) {
-      apps[i] = data[i];
+    for(var i in data.games) {
+      apps[i] = data.games[i];
       createGame(i, apps[i]);
     }
-    processCurrentMember();
+    var d = curr[data.profile];
+    curr[data.profile] = null;
+    processCurrentMember(d);
   });
 
   function createGame(id, data) {

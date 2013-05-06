@@ -80,10 +80,10 @@ app.io.route('?', function(req) {
 
 app.io.route('games?', function(req) {
   requested = {};
-  for(var i = 0; i < req.data.length; ++ i) {
-    requested[req.data[i]] = appDB[req.data[i]];
+  for(var i = 0; i < req.data.fetch.length; ++ i) {
+    requested[req.data.fetch[i]] = appDB[req.data.fetch[i]];
   }
-  req.io.emit('games!', requested);
+  req.io.emit('games!', {games: requested, profile: req.data.profile});
 });
 
 // Redirect all /group/* to /*
