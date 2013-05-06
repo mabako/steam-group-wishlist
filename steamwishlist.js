@@ -5,7 +5,9 @@ console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 var app = require('express.io')()
   , xml2js = require('xml2js').parseString
   , request = require('request')
-  , cheerio = require('cheerio');
+  , cheerio = require('cheerio')
+  , openid = require('openid')
+  , relyingParty = new openid.RelyingParty('http://localhost:8080/!/auth', 'http://localhost:8081/', true, false, []);
 app.http().io();
 
 var appDB = {};
@@ -59,7 +61,8 @@ app.io.route('?', function(req) {
     var games = [];
     $('.wishlistRow').each(function(i, elem) {
       // Reduce this to the App ID
-      var appLink = $(this).find('.gameLogo').children('a').first();
+      var obj = $(this);
+      var appLink = obj.find('.gameLogo').children('a').first();
       var appID = parseInt(appLink.attr('href').substr(30));
       games[i] = appID;
 
@@ -67,10 +70,10 @@ app.io.route('?', function(req) {
       // TODO this shud prolly be purged somewhere somehow.
       // TODO Deals?
       if(appDB[appID] == undefined) {
-        var price = $(this).find('.price').text().trim();
-        if(price == '') price = $(this).find('.discount_original_price').text();
+        var price = obj.find('.price').text().trim();
+        if(price == '') price = obj.find('.discount_original_price').text();
         if(price == '') price = 'N/A';
-        var appEntry = {name: $(this).find('h4').text(), price: price, image: appLink.find('img').attr('src')};
+        var appEntry = {name: obj.find('h4').text(), price: price, image: appLink.find('img').attr('src')};
         appDB[appID] = appEntry;
       }
     });
@@ -93,21 +96,59 @@ app.get('/group/:name', function(req, res) {
 
 // Redirect the homepage to somewhere else
 app.get('/', function(req, res) {
-  res.redirect('/tower-of-god');
+  res.redirect('/!/');
 });
 
 // Static files
 app.get('/sort.js', function(req, res) {
   res.sendfile(__dirname + '/sort.js');
-})
+});
 
 app.get('/wishlist.js', function(req, res) {
   res.sendfile(__dirname + '/wishlist.js');
-})
+});
+
+app.get('/favicon.ico', function(req, res) {
+  res.sendfile(__dirname + '/favicon.ico');
+});
+
+// Login
+app.get('/!/auth', function(req, res) {
+  relyingParty.verifyAssertion(req, function(error, result) {
+    console.log(JSON.stringify(result));
+    res.writeHead(200);
+    res.end(!error && result.authenticated 
+      ? 'Success :)'
+      : 'Failed: ' + req.query['openid.error']);
+  });
+});
+
+app.get('/!', function(req, res) {
+  console.log(req.params);
+
+  relyingParty.authenticate('http://steamcommunity.com/openid', false, function(err, u) {
+    if(err) {
+      res.writeHead(200);
+      res.end('Failed: ' + err.message);
+    } else if(!u) {
+      res.writeHead(200);
+      res.end('Failed.');
+    } else {
+      res.writeHead(302, {Location: u});
+      res.end();
+    }
+  });
+});
+
 
 // Send the file to do all the client-side processing
 app.get('/*', function(req, res) {
-  res.sendfile(__dirname + '/client.html');
+  var groupname = req.params[0];
+  if(groupname.indexOf('/') >= 0) {
+    res.redirect('/' + groupname.substr(0, groupname.indexOf('/')));
+  } else {
+    res.sendfile(__dirname + '/client.html');
+  }
 });
 
 var ip = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1'
