@@ -5,7 +5,8 @@
     "express.io": "1.1.x",
     "xml2js": "0.2.x",
     "cheerio": "0.11.x",
-    "request": "2.21.x"
+    "request": "2.21.x",
+    "log-timestamp": ">= 0.0.5"
   },
   "engines": {
     "node": ">= 0.6.0",

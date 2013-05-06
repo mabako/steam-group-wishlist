@@ -54,7 +54,7 @@ $(function() {
   }
 
   function updateCounter() {
-    document.getElementById('people').innerHTML = offset + '/' + members.length;
+    document.getElementById('people').innerHTML = offset + '/' + members.length + ' &mdash; You may want to visit the <a href="http://www.steamgifts.com/forum/UHlGN" target="_blank">forum topic</a>.';
   }
 
   io.on('m', function(data) {

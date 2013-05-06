@@ -1,4 +1,5 @@
 #!/bin/env node
+require('log-timestamp')
 console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 
 var app = require('express.io')()
@@ -45,12 +46,12 @@ function memberlistUpdate(req, page) {
 // node.js stuffs!
 // Initial connection
 app.io.route('Hi-diddly-ho, neighborino', function(req) {
+  console.log('Fetching group info for ' + req.data);
   memberlistUpdate(req, 1);
 });
 
 // Ask for the wishlist of a single person.
 app.io.route('?', function(req) {
-  console.log('Requesting ' + req.data);
   fetchBase('http://steamcommunity.com/profiles/' + req.data + '/wishlist?cc=us', function(err, res) {
     $ = cheerio.load(res);
 
@@ -77,7 +78,6 @@ app.io.route('?', function(req) {
 })
 
 app.io.route('games?', function(req) {
-  console.log('Requesting games ' + req.data);
   requested = {};
   for(var i = 0; i < req.data.length; ++ i) {
     requested[req.data[i]] = appDB[req.data[i]];
