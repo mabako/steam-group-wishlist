@@ -35,6 +35,8 @@ function memberlistUpdate(req, page) {
       }
       res = res.memberList;
 
+      if(res.currentPage == 1)
+        req.io.emit('t', res.groupDetails[0].groupName);
       req.io.emit('m', res.members[0].steamID64);
       if(res.currentPage < res.totalPages) {
         memberlistUpdate(req, page + 1);
@@ -42,6 +44,27 @@ function memberlistUpdate(req, page) {
         req.io.emit('k');
       }
     });
+  });
+}
+
+function friendsUpdate(req) {
+  fetchBase('http://steamcommunity.com/profiles/' + req.data.substr(8) + '/friends/?xml=1', function(err, content) {
+    if(err) {
+      console.log(err);
+      return;
+    }
+    
+    xml2js(content, function(err, res) {
+      if(err || !res) {
+        console.log(err);
+        return;
+      }
+
+      res = res.friendsList;
+      req.io.emit('t', 'Friends of ' + res.steamID);
+      req.io.emit('m', res.friends[0].friend);
+      req.io.emit('k');
+    })
   });
 }
 
@@ -58,7 +81,11 @@ app.use(express.cookieParser('6-1e8-4D_Z-1!t91@_aS.@l-x-IM2#4_1$-_"4_01/)+-nM_d;
 // Initial connection
 app.io.route('Hi-diddly-ho, neighborino', function(req) {
   console.log('Fetching group info for ' + req.data);
-  memberlistUpdate(req, 1);
+  if(req.data.substr(0, 8) == 'friends/') {
+    friendsUpdate(req);
+  } else {
+    memberlistUpdate(req, 1);
+  }
 });
 
 // Ask for the wishlist of a single person.
@@ -122,7 +149,7 @@ app.get('/', function(req, res) {
           link = link.substr(link.lastIndexOf('/') + 1);
           groups[groups.length] = {url: link, name: obj.text()};
         });
-        res.render('profile.jade', {name: name, groups: groups});
+        res.render('profile.jade', {name: name, groups: groups, id: id});
       }
     });
   } else {
@@ -162,12 +189,16 @@ app.get('/!', function(req, res) {
 
 
 // Send the file to do all the client-side processing
+app.get('/friends/*', function(req, res) {
+  res.render('group.jade');
+});
+
 app.get('/*', function(req, res) {
   var groupname = req.params[0];
   if(groupname.indexOf('/') >= 0) {
     res.redirect('/' + groupname.substr(0, groupname.indexOf('/')));
   } else {
-    res.render('group.jade')
+    res.render('group.jade');
   }
 });
 

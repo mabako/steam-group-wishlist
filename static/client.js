@@ -154,4 +154,8 @@ $(function() {
   function createGame(id, data) {
     $('#games').append('<div id="g' + id + '"><a href="http://store.steampowered.com/app/' + id + '" target="_blank"><img src="' + data.image + '"/></a><div class="r"><div class="cnt">0</div><div class="pr">' + data.price + '</div><div class="n"><a href="http://store.steampowered.com/app/' + id + '" target="_blank">' + data.name + '</a></div><div class="ppl"></div></div></div>');
   }
+
+  io.on('t', function(data) {
+    $('h1').text(data);
+  })
 });
