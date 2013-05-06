@@ -1,0 +1,17 @@
+extends homelayout
+
+block content
+  div
+    p= name
+
+  .list
+    p
+      strong Your Groups
+    each group in groups
+      p
+        a(href='/'+group.url)= group.name
+  .list
+    p
+      a(href='http://www.steamgifts.com/forum/UHlGN',target='_blank') Visit the forum topic
+    p
+      a(href='/!/logout') Logout

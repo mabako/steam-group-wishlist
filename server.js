@@ -14,7 +14,6 @@ app.http().io();
 var appDB = {};
 
 function fetchBase(url, func) {
-  var content = '';
   request(url, function(err, res, body) {
     func(err, body);
   }).end();
@@ -108,10 +107,26 @@ app.get('/group/:name', function(req, res) {
 app.get('/', function(req, res) {
   var id = req.signedCookies.id;
   if(id) {
-    console.log(id);
-    res.end();
+    fetchBase('http://steamcommunity.com/profiles/' + id + '/groups', function(err, content) {
+      if(err) {
+        res.writeHead(500);
+        res.end();
+      } else {
+        $ = cheerio.load(content);
+
+        var name = $('h1').text();
+        var groups = [];
+        $('a.linkTitle').each(function(i, elem) {
+          var obj = $(this);
+          var link = obj.attr('href');
+          link = link.substr(link.lastIndexOf('/') + 1);
+          groups[groups.length] = {url: link, name: obj.text()};
+        });
+        res.render('profile.jade', {name: name, groups: groups});
+      }
+    });
   } else {
-    res.render('login.jade')
+    res.render('login.jade');
   }
 });
 
@@ -124,6 +139,11 @@ app.get('/!/auth', function(req, res) {
       res.end('Failed: ' + error.message);
     }
   });
+});
+
+app.get('/!/logout', function(req, res) {
+  res.cookie('id', '');
+  res.redirect('/');
 });
 
 app.get('/!', function(req, res) {
