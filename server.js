@@ -2,12 +2,13 @@
 require('log-timestamp')
 console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 
-var app = require('express.io')()
+var express = require('express.io')
+  , app = express()
   , xml2js = require('xml2js').parseString
   , request = require('request')
   , cheerio = require('cheerio')
   , openid = require('openid')
-  , relyingParty = new openid.RelyingParty('http://localhost:8080/!/auth', 'http://localhost:8081/', true, false, []);
+  , relyingParty = new openid.RelyingParty('http://localhost:8080/!/auth', 'http://localhost:8080/', true, false, []);
 app.http().io();
 
 var appDB = {};
@@ -44,6 +45,15 @@ function memberlistUpdate(req, page) {
     });
   });
 }
+
+// Static files
+app.use(express.static(__dirname + '/static'));
+// moreso dynamic content
+app.engine('jade', require('jade').__express);
+app.set('views', __dirname + '/views');
+// Cookies with secret. Not like it's the matter of actually keeping them secure, as it's open source.
+// For what it's worth, there's no really private data here.
+app.use(express.cookieParser('6-1e8-4D_Z-1!t91@_aS.@l-x-IM2#4_1$-_"4_01/)+-nM_d;'));
 
 // node.js stuffs!
 // Initial connection
@@ -91,41 +101,32 @@ app.io.route('games?', function(req) {
 
 // Redirect all /group/* to /*
 app.get('/group/:name', function(req, res) {
-  res.redirect('/' + req.params.name);
-});
-
-// Redirect the homepage to somewhere else
-app.get('/', function(req, res) {
-  res.redirect('/!/');
-});
-
-// Static files
-app.get('/sort.js', function(req, res) {
-  res.sendfile(__dirname + '/sort.js');
-});
-
-app.get('/client.js', function(req, res) {
-  res.sendfile(__dirname + '/client.js');
-});
-
-app.get('/favicon.ico', function(req, res) {
-  res.sendfile(__dirname + '/favicon.ico');
+    res.redirect('/' + req.params.name);
 });
 
 // Login
+app.get('/', function(req, res) {
+  var id = req.signedCookies.id;
+  if(id) {
+    console.log(id);
+    res.end();
+  } else {
+    res.render('login.jade')
+  }
+});
+
 app.get('/!/auth', function(req, res) {
   relyingParty.verifyAssertion(req, function(error, result) {
-    console.log(JSON.stringify(result));
-    res.writeHead(200);
-    res.end(!error && result.authenticated 
-      ? 'Success :)'
-      : 'Failed: ' + req.query['openid.error']);
+    if(!error && result.authenticated) {
+      res.cookie('id', result.claimedIdentifier.replace('http://steamcommunity.com/openid/id/', ''), { signed: true });
+      res.redirect('/');
+    } else {
+      res.end('Failed: ' + error.message);
+    }
   });
 });
 
 app.get('/!', function(req, res) {
-  console.log(req.params);
-
   relyingParty.authenticate('http://steamcommunity.com/openid', false, function(err, u) {
     if(err) {
       res.writeHead(200);
@@ -134,8 +135,7 @@ app.get('/!', function(req, res) {
       res.writeHead(200);
       res.end('Failed.');
     } else {
-      res.writeHead(302, {Location: u});
-      res.end();
+      res.redirect(u);
     }
   });
 });
@@ -147,7 +147,7 @@ app.get('/*', function(req, res) {
   if(groupname.indexOf('/') >= 0) {
     res.redirect('/' + groupname.substr(0, groupname.indexOf('/')));
   } else {
-    res.sendfile(__dirname + '/client.html');
+    res.render('group.jade')
   }
 });
 

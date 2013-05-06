@@ -1,0 +1,20 @@
+extends layout
+
+block head
+  style(type='text/css')
+    body {
+      font-family: 'Roboto Slab', sans-serif;
+      margin:100px;
+      text-align: center;
+    }
+    a {
+      color: black;
+      text-decoration: none;
+    }
+
+block content
+  div
+    p You can view a list of your own groups by logging in.
+    p
+      a(href='/!/')
+        img(alt='Sign in through Steam', src='/steam.png', title='Sign in through Steam')
