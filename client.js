@@ -10,6 +10,33 @@ $(function() {
   // apps[appId] => {name, price}
   var apps = {};
   var curr = {};
+  
+  // If localStorage is support, both member information and game information are stored on your own computer.
+  var supportLocalStorage = 'localStorage' in window && window['localStorage'] !== null;
+  var cacheEverythingInDays = 15;
+
+  var cacheMembers = false;
+  // members are only cached if the group has less than 200 members.
+  var cacheMembersCount = 200;
+  var cacheMembersInDays = 3;
+
+  var now = new Date().getTime(); // Guaranteed to be wrong about every second after the initial request, but is conceptually close enough to verify days of cache.
+
+  (function() {
+    if(supportLocalStorage) {
+      if(localStorage.expires) {
+        if(parseInt(localStorage.expires) < now) {
+          console.log('localStorage expired.')
+          localStorage.clear();
+        } else {
+          return;
+        }
+      }
+      var expires = new Date();
+      expires.setDate(expires.getDate() + cacheEverythingInDays);
+      localStorage.expires = expires.getTime();
+    }
+  })();
 
   function processCurrentMember(data) {
     processNext();
@@ -26,7 +53,6 @@ $(function() {
         people.append(linktext);
       }
     }
-    sortStuff();
   }
   
   function sortStuff() {
@@ -40,7 +66,16 @@ $(function() {
   function checkGameInfo(data) {
     var toFetch = [];
     for(var i = 0; i < data.games.length; ++ i) {
-      if(apps[data.games[i]] == undefined) {
+      if(!apps[data.games[i]]) {
+        if(supportLocalStorage) {
+          var storedObject = localStorage['game-' + data.games[i]];
+          if(storedObject) {
+            var obj = JSON.parse(storedObject);
+            apps[data.games[i]] = obj;
+            createGame(data.games[i], obj);
+            continue;
+          }
+        }
         toFetch[toFetch.length] = data.games[i];
       }
     }
@@ -55,16 +90,34 @@ $(function() {
 
   function updateCounter() {
     document.getElementById('people').innerHTML = offset + '/' + members.length + ' &mdash; You may want to visit the <a href="http://www.steamgifts.com/forum/UHlGN" target="_blank">forum topic</a>.';
+    if(offset == members.length) {
+      sortStuff();
+    }
   }
 
   io.on('m', function(data) {
     members = members.concat(data);
     updateCounter();
+    cacheMembers = supportLocalStorage && members.length < cacheMembersCount;
   });
 
   function processNext() {
-    var e = members[offset++];
+    var e = members[offset];
     if(e == null) return;
+    ++ offset;
+
+    if(cacheMembers) {
+      var storedMember = localStorage['u-' + e];
+      if(storedMember) {
+        var timestamp = storedMember.substr(0, 13);
+        if(parseInt(timestamp) > now) {
+          var obj = JSON.parse(storedMember.substr(13));
+          checkGameInfo(obj);
+          updateCounter();
+          return;
+        }
+      }
+    }
     io.emit('?', e);
   }
 
@@ -75,12 +128,23 @@ $(function() {
   io.on('u', function(data) {
     checkGameInfo(data);
     updateCounter();
+
+    if(cacheMembers) {
+      var timestamp = new Date();
+      timestamp.setDate(timestamp.getDate() + cacheMembersInDays);
+      localStorage['u-' + data.profile] = timestamp.getTime() + JSON.stringify(data);
+    }
+
+    sortStuff();
   });
 
   io.on('games!', function(data) {
     for(var i in data.games) {
       apps[i] = data.games[i];
       createGame(i, apps[i]);
+      if(supportLocalStorage) {
+        localStorage['game-' + i] = JSON.stringify(apps[i]);
+      }
     }
     var d = curr[data.profile];
     curr[data.profile] = null;

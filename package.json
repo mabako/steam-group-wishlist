@@ -13,8 +13,8 @@
     "node": ">= 0.6.0",
     "npm": ">= 1.0.0"
   },
-  "main": "steamwishlist.js",
+  "main": "server.js",
   "scripts": {  
-    "start": "node steamwishlist.js"
+    "start": "node server.js"
   }
 }

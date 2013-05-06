@@ -104,8 +104,8 @@ app.get('/sort.js', function(req, res) {
   res.sendfile(__dirname + '/sort.js');
 });
 
-app.get('/wishlist.js', function(req, res) {
-  res.sendfile(__dirname + '/wishlist.js');
+app.get('/client.js', function(req, res) {
+  res.sendfile(__dirname + '/client.js');
 });
 
 app.get('/favicon.ico', function(req, res) {
