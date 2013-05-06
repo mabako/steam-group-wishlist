@@ -1,5 +1,5 @@
 $(function() {
-  io = io.connect(window.location.origin == 'http://swl.mabako.net' ? 'http://swl.mabako.net:8000' : null);
+  io = io.connect((window.location.origin == 'http://swl.mabako.net' || window.location.origin.indexOf('rhcloud.com') > 0) ? (window.location.origin + ':8000') : null);
 
   // Emit ready event.
   io.emit('Hi-diddly-ho, neighborino', window.location.pathname.substr(1)); 
