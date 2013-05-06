@@ -8,7 +8,7 @@ var express = require('express.io')
   , request = require('request')
   , cheerio = require('cheerio')
   , openid = require('openid')
-  , relyingParty = new openid.RelyingParty('http://localhost:8080/!/auth', 'http://localhost:8080/', true, false, []);
+  , relyingParty = new openid.RelyingParty('http://swl.mabako.net/!/auth', 'http://swl.mabako.net/', true, false, []);
 app.http().io();
 
 var appDB = {};
