@@ -67,7 +67,8 @@ app.io.route('?', function(req) {
       // TODO this shud prolly be purged somewhere somehow.
       // TODO Deals?
       if(appDB[appID] == undefined) {
-        var price = $(this).find('.price').text().trim()
+        var price = $(this).find('.price').text().trim();
+        if(price == '') price = $(this).find('.discount_original_price').text();
         if(price == '') price = 'N/A';
         var appEntry = {name: $(this).find('h4').text(), price: price, image: appLink.find('img').attr('src')};
         appDB[appID] = appEntry;
