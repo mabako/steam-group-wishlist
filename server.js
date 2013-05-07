@@ -189,17 +189,16 @@ app.get('/!', function(req, res) {
 
 
 // Send the file to do all the client-side processing
-app.get('/friends/*', function(req, res) {
-  res.render('group.jade');
+app.get('/friends/:user', function(req, res) {
+  res.render('wishlist.jade', {group: 'friends/' + req.params.user});
 });
 
-app.get('/*', function(req, res) {
-  var groupname = req.params[0];
-  if(groupname.indexOf('/') >= 0) {
-    res.redirect('/' + groupname.substr(0, groupname.indexOf('/')));
-  } else {
-    res.render('group.jade');
-  }
+app.get('/:group/:app', function(req, res) {
+  res.render('check.jade', {group: req.params.group, app: req.params.app});
+})
+
+app.get('/:group', function(req, res) {
+  res.render('wishlist.jade', {group: req.params.group});
 });
 
 var ip = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1'
