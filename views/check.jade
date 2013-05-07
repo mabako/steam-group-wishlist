@@ -1,40 +1,8 @@
 extends layout
 
 block head
-  style(type='text/css')
-    body {
-      font-family: 'Roboto Slab', sans-serif;
-    }
-    .ppl a, .n a, #people a {
-      color: #000;
-      text-decoration: none;
-    }
-    .cnt {
-      float: left;
-    }
-    .cnt, .n {
-      padding-right: 0.5em;
-      padding-left: 0.5em;
-    }
-    .n {
-     display: inline;
-    }
-      img {
-      float: left;
-      padding-right: 5px;
-    }
-    #haz, #haznot, #private {
-      clear: both;
-      padding-top: 5px;
-    }
-    .cnt {
-      background: #87def3;
-    }
-    .n {
-      background: #eee;
-    }
+  link(href='/common.css',rel='stylesheet',type='text/css')
   script(src='//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js')
-  script(src='/sort.js')
   script(src='/socket.io/socket.io.js')
   script(src='/common.js')
   script(src='/check.js')

@@ -1,0 +1,53 @@
+body {
+  font-family: 'Roboto Slab', sans-serif;
+}
+.ppl a, .n a, #people a {
+  color: #000;
+  text-decoration: none;
+}
+.cnt, .pr {
+  float: left;
+}
+.cnt, .n, .pr {
+  padding-right: 0.5em;
+  padding-left: 0.5em;
+}
+.n {
+ display: inline;
+}
+img {
+  float: left;
+  padding-right: 5px;
+  border: 0px;
+}
+#haz, #haznot, #private {
+  clear: both;
+  padding-top: 5px;
+}
+#games > div {
+  clear: both;
+  padding-top: 5px;
+}
+.cnt {
+  background: #87def3;
+}
+.n {
+  background: #eee;
+}
+.err {
+  background: #e71717;
+  color: #fff;
+}
+.r {
+  padding-left: 195px;
+}
+.pr {
+  background: #fcffad;
+}
+.err {
+  background: #e71717;
+  color: #fff;
+}
+.ppl a + a:before {
+  content: ", ";
+}

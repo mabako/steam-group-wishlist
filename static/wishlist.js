@@ -17,13 +17,8 @@ start = function(groupName) {
         var game = data.games[i];
         var obj = $('#g' + game);
         $('.cnt', obj).text(parseInt($('.cnt', obj).text()) + 1);
-        
-        var people = $('.ppl', obj);
-        if(people.text().length > 0) {
-          people.append(', ' + linktext);
-        } else {
-          people.append(linktext);
-        }
+
+        $('.ppl', obj).append(linktext);
       }
       if(sortTimer == null) {
         sortTimer = setTimeout(sortStuff, 0);

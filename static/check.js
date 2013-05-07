@@ -16,16 +16,11 @@ start = function(groupName, app) {
         container = 'private';
       else if(data.games[parseInt(app)])
         container = 'haz';
-      
+
       var obj = $('#' + container);
       $('.cnt', obj).text(parseInt($('.cnt', obj).text()) + 1);
-      
-      var people = $('.ppl', obj);
-      if(people.text().length > 0) {
-        people.append(', ' + linktext);
-      } else {
-        people.append(linktext);
-      }
+
+      $('.ppl', obj).append(linktext);
     }
 
     function updateCounter() {
