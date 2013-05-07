@@ -27,8 +27,13 @@ function sendTitle(req, title, app) {
     } else {
       fetchBase('http://store.steampowered.com/app/' + app + '?l=english', function(err, res) {
         if(!err) {
-          var str = cheerio.load(res)('title').text();
-          title += ' - ' + str.substr(0, str.length - 8).trim();
+          $ = cheerio.load(res);
+          var str = $('.apphub_AppName').text();
+          if(!str) {
+            var str = $('title').text();
+            str = str.substr(0, str.length - 8).trim();
+          }
+          title += ' - ' + str;
           req.io.emit('t', title);
         }
       })
@@ -101,7 +106,7 @@ app.set('views', __dirname + '/views');
 app.use(express.cookieParser('6-1e8-4D_Z-1!t91@_aS.@l-x-IM2#4_1$-_"4_01/)+-nM_d;'));
 
 // node.js stuffs!
-// Initial connection
+// Initial io connection
 app.io.route('Hi-diddly-ho, neighborino', function(req) {
   console.log('Fetching info: ' + req.data.name + ', app:' + req.data.index);
   if(req.data.name.substr(0, 8) == 'friends/') {
@@ -110,6 +115,66 @@ app.io.route('Hi-diddly-ho, neighborino', function(req) {
     memberlistUpdate(req, 1);
   }
 });
+
+// Fetches all groups of a user along with his name
+function fetchGroups(id, func) {
+  fetchBase('http://steamcommunity.com/profiles/' + id + '/groups', function(err, content) {
+    if(err) {
+      res.writeHead(500);
+      res.end();
+    } else {
+      $ = cheerio.load(content);
+
+      var name = $('h1').text();
+      var groups = [];
+      $('a.linkTitle').each(function(i, elem) {
+        var obj = $(this);
+        var link = obj.attr('href');
+        link = link.substr(link.lastIndexOf('/') + 1);
+        groups[groups.length] = {url: link, name: obj.text()};
+      });
+      func(name, groups);
+    }
+  });
+}
+
+// Searching for a game
+app.get('/!/check', function(req, res) {
+  var id = req.signedCookies.id;
+  var selected = req.params.group || 'friends';
+  if(id) {
+    fetchGroups(id, function(profileName, groups) {
+      res.render('sel.jade', {groups: groups, id: id, selected: selected, gr: req.params.group});
+    });
+  } else {
+    res.render('sel.jade', {groups: [], id: null, selected: selected, gr: req.params.group});
+  }
+});
+
+app.io.route('storesearch', function(req) {
+  console.log('Looking up ' + req.data + ' in Store');
+  fetchBase('http://store.steampowered.com/search/suggest?term=' + encodeURIComponent(req.data) + '&f=games&cc=US&l=english', function(err, res) {
+    if(err || !res) {
+      req.io.emit('storesearched', {input: req.data, result: []});
+    } else {
+      $ = cheerio.load(res);
+
+      var results = [];
+      $('a').each(function(i, elem) {
+        var obj = $(this);
+
+        var link = obj.attr('href').replace('http://store.steampowered.com/app/', '');
+        link = link.substr(0, link.indexOf('/'));
+
+        var text = obj.find('.match_name').text();
+        if((''+parseInt(link)).length == link.length && text.indexOf('Free DLC') == -1 && text.indexOf('Prima Official Strategy Guide') == -1 && !(/\b(Demo)\b/ig).test(text)) {
+          results[results.length] = {app: parseInt(link), name: text}
+        }
+      });
+      req.io.emit('storesearched', {input: req.data, result: results});
+    }
+  });
+})
 
 // Ask for the wishlist of a single person.
 app.io.route('?', function(req) {
@@ -179,23 +244,8 @@ app.get('/group/:name', function(req, res) {
 app.get('/', function(req, res) {
   var id = req.signedCookies.id;
   if(id) {
-    fetchBase('http://steamcommunity.com/profiles/' + id + '/groups', function(err, content) {
-      if(err) {
-        res.writeHead(500);
-        res.end();
-      } else {
-        $ = cheerio.load(content);
-
-        var name = $('h1').text();
-        var groups = [];
-        $('a.linkTitle').each(function(i, elem) {
-          var obj = $(this);
-          var link = obj.attr('href');
-          link = link.substr(link.lastIndexOf('/') + 1);
-          groups[groups.length] = {url: link, name: obj.text()};
-        });
-        res.render('profile.jade', {name: name, groups: groups, id: id});
-      }
+    fetchGroups(id, function(profileName, groups) {
+      res.render('profile.jade', {name: profileName, groups: groups, id: id});
     });
   } else {
     res.render('login.jade');
