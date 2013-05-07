@@ -8,6 +8,7 @@ start = function(groupName) {
 
     // members are only cached if the group has less than 200 members.
     var cacheMembers = g.supportLocalStorage && members.length < g.cacheMembersCount;
+    var sortTimer = null;
 
     function processCurrentMember(data) {
       processNext();
@@ -24,10 +25,13 @@ start = function(groupName) {
           people.append(linktext);
         }
       }
-      sortStuff();
+      if(sortTimer == null) {
+        sortTimer = setTimeout(sortStuff, 0);
+      }
     }
     
     function sortStuff() {
+      sortTimer = null;
       $('#games > div').sortElements(function(a, b){
         var pa = parseInt($('.cnt', a).text());
         var pb = parseInt($('.cnt', b).text());
