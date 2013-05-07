@@ -101,7 +101,7 @@ app.use(express.cookieParser('6-1e8-4D_Z-1!t91@_aS.@l-x-IM2#4_1$-_"4_01/)+-nM_d;
 // node.js stuffs!
 // Initial connection
 app.io.route('Hi-diddly-ho, neighborino', function(req) {
-  console.log('Fetching group info for ' + req.data.name);
+  console.log('Fetching info: ' + req.data.name + ', app:' + req.data.index);
   if(req.data.name.substr(0, 8) == 'friends/') {
     friendsUpdate(req);
   } else {
