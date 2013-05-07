@@ -1,5 +1,5 @@
 start = function(groupName) {
-  commonInit('Hi-diddly-ho, neighborino', groupName, function(members) {
+  commonInit(null, groupName, function(members) {
     var offset = 0;
 
     // apps[appId] => {name, price}
@@ -83,6 +83,7 @@ start = function(groupName) {
             updateCounter();
             return;
           }
+          localStorage['u-' + e] = null;
         }
       }
       io.emit('?', e);

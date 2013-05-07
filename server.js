@@ -19,9 +19,29 @@ function fetchBase(url, func) {
   }).end();
 }
 
+function sendTitle(req, title, app) {
+  if(app) {
+    if(appDB[app]) {
+      title += ' - ' + appDB[req.data.index].name;
+      req.io.emit('t', title);
+    } else {
+      fetchBase('http://store.steampowered.com/app/' + app + '?l=english', function(err, res) {
+        if(!err) {
+          var str = cheerio.load(res)('title').text();
+          title += ' - ' + str.substr(0, str.length - 8).trim();
+          req.io.emit('t', title);
+        }
+      })
+    }
+  } else {
+    req.io.emit('t', title);
+  }
+}
+
 function memberlistUpdate(req, page) {
   // numeric group id? they have different urls
-  var url = ('' + parseInt(req.data, 10)).length == req.data.length ? ('gid/' + req.data) : ('groups/' + req.data);
+  var name = req.data.name;
+  var url = ('' + parseInt(name, 10)).length == req.data.length ? ('gid/' + name) : ('groups/' + name);
   fetchBase('http://steamcommunity.com/' + url + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
     if(err) {
       console.log(err);
@@ -35,8 +55,9 @@ function memberlistUpdate(req, page) {
       }
       res = res.memberList;
 
-      if(res.currentPage == 1)
-        req.io.emit('t', res.groupDetails[0].groupName);
+      if(res.currentPage == 1) {
+        sendTitle(req, res.groupDetails[0].groupName, req.data.index)
+      }
       req.io.emit('m', res.members[0].steamID64);
       if(res.currentPage < res.totalPages) {
         memberlistUpdate(req, page + 1);
@@ -48,7 +69,7 @@ function memberlistUpdate(req, page) {
 }
 
 function friendsUpdate(req) {
-  fetchBase('http://steamcommunity.com/profiles/' + req.data.substr(8) + '/friends/?xml=1', function(err, content) {
+  fetchBase('http://steamcommunity.com/profiles/' + req.data.name.substr(8) + '/friends/?xml=1', function(err, content) {
     if(err) {
       console.log(err);
       return;
@@ -61,7 +82,7 @@ function friendsUpdate(req) {
       }
 
       res = res.friendsList;
-      req.io.emit('t', 'Friends of ' + res.steamID);
+      sendTitle(req, 'Friends of ' + res.steamID, req.data.index);
       req.io.emit('m', res.friends[0].friend);
       req.io.emit('k');
     })
@@ -80,8 +101,8 @@ app.use(express.cookieParser('6-1e8-4D_Z-1!t91@_aS.@l-x-IM2#4_1$-_"4_01/)+-nM_d;
 // node.js stuffs!
 // Initial connection
 app.io.route('Hi-diddly-ho, neighborino', function(req) {
-  console.log('Fetching group info for ' + req.data);
-  if(req.data.substr(0, 8) == 'friends/') {
+  console.log('Fetching group info for ' + req.data.name);
+  if(req.data.name.substr(0, 8) == 'friends/') {
     friendsUpdate(req);
   } else {
     memberlistUpdate(req, 1);
@@ -123,6 +144,28 @@ app.io.route('games?', function(req) {
     requested[req.data.fetch[i]] = appDB[req.data.fetch[i]];
   }
   req.io.emit('games!', {games: requested, profile: req.data.profile});
+});
+
+// ask for the owned games of a single person
+var matchOwnedGamesStart = 'var rgGames = ';
+var matchOwnedGamesEnd = '];';
+app.io.route('owned?', function(req) {
+  fetchBase('http://steamcommunity.com/profiles/' + req.data + '/games?tab=all&l=english', function(err, res) {
+    var $ = cheerio.load(res);
+    if(res.indexOf('<p class="errorPrivate">This profile is private.</p>') >= 0) {
+      req.io.emit('owned!', {profile: req.data, games: null, name: $('title').text().replace('Steam Community :: ID :: ','')});
+    } else {
+      // Well, this is awkward.
+      var start = res.indexOf(matchOwnedGamesStart) + matchOwnedGamesStart.length;
+      var end = res.indexOf(matchOwnedGamesEnd, start) + 1;
+      var games = JSON.parse(res.substring(start, end));
+      var owned = {};
+      for(var i = 0; i < games.length; ++ i) {
+        owned[games[i].appid] = true;
+      }
+      req.io.emit('owned!', {profile: req.data, games: owned, name: $('h1').text()});
+    }
+  });
 });
 
 // Redirect all /group/* to /*
@@ -189,6 +232,10 @@ app.get('/!', function(req, res) {
 
 
 // Send the file to do all the client-side processing
+app.get('/friends/:user/:app', function(req, res) {
+  res.render('check.jade', {group: 'friends/' + req.params.user, app: req.params.app});
+});
+
 app.get('/friends/:user', function(req, res) {
   res.render('wishlist.jade', {group: 'friends/' + req.params.user});
 });

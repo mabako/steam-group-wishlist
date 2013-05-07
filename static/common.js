@@ -25,7 +25,7 @@ g = {
 })();
 
 
-function commonInit(event, groupName, func) {
+function commonInit(index, groupName, func) {
   io = io.connect((window.location.hostname == 'swl.mabako.net' || window.location.hostname.indexOf('rhcloud.com') > 0) ? (window.location.hostname + ':8000') : null);
 
   var members = [];
@@ -33,7 +33,7 @@ function commonInit(event, groupName, func) {
     members = members.concat(data);
   });
 
-  io.emit(event, groupName);
+  io.emit('Hi-diddly-ho, neighborino', {name: groupName, index: index});
 
   io.on('k', function() {
     func(members);
