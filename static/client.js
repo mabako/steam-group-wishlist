@@ -53,6 +53,7 @@ $(function() {
         people.append(linktext);
       }
     }
+    sortStuff();
   }
   
   function sortStuff() {
@@ -90,9 +91,6 @@ $(function() {
 
   function updateCounter() {
     document.getElementById('people').innerHTML = offset + '/' + members.length + ' &mdash; You may want to visit the <a href="http://www.steamgifts.com/forum/UHlGN" target="_blank">forum topic</a>.';
-    if(offset == members.length) {
-      sortStuff();
-    }
   }
 
   io.on('m', function(data) {
@@ -134,8 +132,6 @@ $(function() {
       timestamp.setDate(timestamp.getDate() + cacheMembersInDays);
       localStorage['u-' + data.profile] = timestamp.getTime() + JSON.stringify(data);
     }
-
-    sortStuff();
   });
 
   io.on('games!', function(data) {
