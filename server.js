@@ -41,7 +41,7 @@ function sendTitle(req, title, app) {
 function memberlistUpdate(req, page) {
   // numeric group id? they have different urls
   var name = req.data.name;
-  var url = ('' + parseInt(name, 10)).length == req.data.length ? ('gid/' + name) : ('groups/' + name);
+  var url = ('' + parseInt(name, 10)).length == name.length ? ('gid/' + name) : ('groups/' + name);
   fetchBase('http://steamcommunity.com/' + url + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
     if(err) {
       console.log(err);
@@ -69,14 +69,16 @@ function memberlistUpdate(req, page) {
 }
 
 function friendsUpdate(req) {
-  fetchBase('http://steamcommunity.com/profiles/' + req.data.name.substr(8) + '/friends/?xml=1', function(err, content) {
+  var id = req.data.name.substr(8);
+  var url = ('' + parseInt(id, 10)).length == id.length ? ('profiles/' + id) : ('id/' + id);
+  fetchBase('http://steamcommunity.com/' + url + '/friends/?xml=1', function(err, content) {
     if(err) {
       console.log(err);
       return;
     }
     
     xml2js(content, function(err, res) {
-      if(err || !res) {
+      if(err || !res || !res.friendsList) {
         console.log(err);
         return;
       }
