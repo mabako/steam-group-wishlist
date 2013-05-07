@@ -41,5 +41,9 @@ function commonInit(index, groupName, func) {
 
   io.on('t', function(data) {
     $('h1').text(data);
-  })
+  });
+
+  io.on('err', function(data) {
+    $('<div>').insertAfter($('h1')).text(data).addClass('err');
+  });
 }
