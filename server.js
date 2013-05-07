@@ -64,7 +64,7 @@ function memberlistUpdate(req, page) {
         sendTitle(req, res.groupDetails[0].groupName, req.data.index)
       }
       req.io.emit('m', res.members[0].steamID64);
-      if(res.currentPage < res.totalPages) {
+      if(parseInt(res.currentPage) < parseInt(res.totalPages)) {
         memberlistUpdate(req, page + 1);
       } else {
         req.io.emit('k');
