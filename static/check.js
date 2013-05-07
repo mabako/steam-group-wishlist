@@ -52,7 +52,6 @@ start = function(groupName, app) {
     }
 
     io.on('owned!', function(data) {
-      console.dir(data);
       processCurrentMember(data);
 
       if(cacheMembers) {

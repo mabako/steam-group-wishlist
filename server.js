@@ -225,12 +225,17 @@ app.io.route('owned?', function(req) {
       // Well, this is awkward.
       var start = res.indexOf(matchOwnedGamesStart) + matchOwnedGamesStart.length;
       var end = res.indexOf(matchOwnedGamesEnd, start) + 1;
-      var games = JSON.parse(res.substring(start, end));
-      var owned = {};
-      for(var i = 0; i < games.length; ++ i) {
-        owned[games[i].appid] = true;
+      try {
+        var games = JSON.parse(res.substring(start, end));
+        var owned = {};
+        for(var i = 0; i < games.length; ++ i) {
+          owned[games[i].appid] = true;
+        }
+        req.io.emit('owned!', {profile: req.data, games: owned, name: $('h1').text()});
+      } catch(e) {
+        console.log('Error when trying to work with:')
+        console.log(res)
       }
-      req.io.emit('owned!', {profile: req.data, games: owned, name: $('h1').text()});
     }
   });
 });
