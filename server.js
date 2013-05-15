@@ -186,7 +186,12 @@ app.io.route('?', function(req) {
   fetchBase('http://steamcommunity.com/profiles/' + req.data + '/wishlist?cc=us', function(err, res) {
     $ = cheerio.load(res);
 
+    // regular steam profile
     var name = $('h1').text();
+    if(!name)
+      // trading card profile
+      name = $('.profile_small_header_name').text().trim();
+
     var games = [];
     $('.wishlistRow').each(function(i, elem) {
       // Reduce this to the App ID
