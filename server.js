@@ -241,7 +241,14 @@ app.io.route('owned?', function(req) {
         for(var i = 0; i < games.length; ++ i) {
           owned[games[i].appid] = true;
         }
-        req.io.emit('owned!', {profile: req.data, games: owned, name: $('h1').text()});
+
+        // regular steam profile
+        var name = $('h1').text();
+        if(!name)
+          // trading card profile
+          name = $('.profile_small_header_name').text().trim();
+
+        req.io.emit('owned!', {profile: req.data, games: owned, name: name});
       } catch(e) {
         console.log('Error when trying to work with:')
         console.log(res)
