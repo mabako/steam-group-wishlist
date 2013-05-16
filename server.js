@@ -46,7 +46,7 @@ function sendTitle(req, title, app) {
 function memberlistUpdate(req, page) {
   // numeric group id? they have different urls
   var name = req.data.name;
-  var url = ('' + parseInt(name, 10)).length == name.length ? ('gid/' + name) : ('groups/' + name);
+  var url = /^\d+$/.test(name) ? ('gid/' + name) : ('groups/' + name);
   fetchBase('http://steamcommunity.com/' + url + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
     if(err) {
       console.log('Member fetching error for ' + url + '\n' + err);
@@ -80,7 +80,7 @@ function memberlistUpdate(req, page) {
 
 function friendsUpdate(req) {
   var id = req.data.name.substr(8);
-  var url = ('' + parseInt(id, 10)).length == id.length ? ('profiles/' + id) : ('id/' + id);
+  var url = /^\d+$/.test(name) ? ('profiles/' + id) : ('id/' + id);
   fetchBase('http://steamcommunity.com/' + url + '/friends/?xml=1', function(err, content) {
     if(err) {
       console.log('Friends fetching error for ' + url + '\n' + err);
@@ -306,19 +306,20 @@ app.get('/!', function(req, res) {
 
 
 // Send the file to do all the client-side processing
-app.get('/friends/:user/:app', function(req, res) {
+var nameregex = '([\\d\\w\\-]+)';
+app.get('/friends/:user' + nameregex + '/:app(\\d+)', function(req, res) {
   res.render('check.jade', {group: 'friends/' + req.params.user, app: req.params.app});
 });
 
-app.get('/friends/:user', function(req, res) {
+app.get('/friends/:user' + nameregex, function(req, res) {
   res.render('wishlist.jade', {group: 'friends/' + req.params.user});
 });
 
-app.get('/:group/:app', function(req, res) {
+app.get('/:group' + nameregex + '/:app(\\d+)', function(req, res) {
   res.render('check.jade', {group: req.params.group, app: req.params.app});
 })
 
-app.get('/:group', function(req, res) {
+app.get('/:group' + nameregex, function(req, res) {
   res.render('wishlist.jade', {group: req.params.group});
 });
 

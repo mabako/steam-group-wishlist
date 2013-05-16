@@ -1,6 +1,6 @@
 {
   "name": "steam-group-wishlist",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "dependencies": {
     "express.io": "1.1.x",
     "xml2js": "0.2.x",
