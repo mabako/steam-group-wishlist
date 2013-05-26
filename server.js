@@ -80,7 +80,7 @@ function memberlistUpdate(req, page) {
 
 function friendsUpdate(req) {
   var id = req.data.name.substr(8);
-  var url = /^\d+$/.test(name) ? ('profiles/' + id) : ('id/' + id);
+  var url = /^\d+$/.test(id) ? ('profiles/' + id) : ('id/' + id);
   fetchBase('http://steamcommunity.com/' + url + '/friends/?xml=1', function(err, content) {
     if(err) {
       console.log('Friends fetching error for ' + url + '\n' + err);
