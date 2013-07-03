@@ -229,8 +229,8 @@ var matchOwnedGamesEnd = '];';
 app.io.route('owned?', function(req) {
   fetchBase('http://steamcommunity.com/profiles/' + req.data + '/games?tab=all&l=english', function(err, res) {
     var $ = cheerio.load(res);
-    if(res.indexOf('<p class="errorPrivate">This profile is private.</p>') >= 0) {
-      req.io.emit('owned!', {profile: req.data, games: null, name: $('title').text().replace('Steam Community :: ID :: ','')});
+    if(res.indexOf('<div class="profile_private_info">') >= 0) {
+      req.io.emit('owned!', {profile: req.data, games: null, name: $('title').text().replace('Steam Community :: ','')});
     } else {
       // Well, this is awkward.
       var start = res.indexOf(matchOwnedGamesStart) + matchOwnedGamesStart.length;
