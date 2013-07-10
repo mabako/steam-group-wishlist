@@ -1,4 +1,7 @@
 #!/bin/env node
+
+var baseURL = 'http://swl.mabako.net';
+
 require('log-timestamp')
 console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 
@@ -8,7 +11,7 @@ var express = require('express.io')
   , request = require('request')
   , cheerio = require('cheerio')
   , openid = require('openid')
-  , relyingParty = new openid.RelyingParty('http://swl.mabako.net/!/auth', 'http://swl.mabako.net/', true, false, []);
+  , relyingParty = new openid.RelyingParty(baseURL + '/!/auth', baseURL, true, false, []);
 app.http().io();
 
 var appDB = {};
