@@ -309,6 +309,10 @@ app.get('/!', function(req, res) {
   });
 });
 
+// Donating... just static, really.
+app.get('/!/donate', function(req, res) {
+  res.render('donate.jade');
+});
 
 // Send the file to do all the client-side processing
 var nameregex = '([\\d\\w\\-]+)';

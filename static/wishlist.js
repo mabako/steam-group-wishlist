@@ -60,7 +60,7 @@ start = function(groupName) {
     }
 
     function updateCounter() {
-      document.getElementById('people').innerHTML = offset + '/' + members.length + ' &mdash; You may want to visit the <a href="http://www.steamgifts.com/forum/UHlGN" target="_blank">forum topic</a>.';
+      document.getElementById('peoplec').innerHTML = offset + '/' + members.length + ' &mdash; ';
     }
 
     function processNext() {
