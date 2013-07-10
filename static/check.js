@@ -10,7 +10,8 @@ start = function(groupName, app) {
     function processCurrentMember(data) {
       updateCounter();
       processNext();
-      var linktext = '<a href="http://steamcommunity.com/profiles/' + data.profile + '/" target="_blank">' + data.name + '</a>';
+      var linktext = '<a href="http://steamcommunity.com/profiles/' + data.profile + '/" target="_blank"' +
+        (data.star ? ' class="star"' : '') + '>' + data.name + '</a>';
       var container = 'haznot'
       if(data.games == null)
         container = 'private';

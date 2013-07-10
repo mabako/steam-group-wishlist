@@ -12,7 +12,8 @@ start = function(groupName) {
 
     function processCurrentMember(data) {
       processNext();
-      var linktext = '<a href="http://steamcommunity.com/profiles/' + data.profile + '/" target="_blank">' + data.name + '</a>';
+      var linktext = '<a href="http://steamcommunity.com/profiles/' + data.profile + '/" target="_blank"' +
+        (data.star ? ' class="star"' : '') + '>' + data.name + '</a>';
       for(var i = 0; i < data.games.length; ++ i) {
         var game = data.games[i];
         var obj = $('#g' + game);

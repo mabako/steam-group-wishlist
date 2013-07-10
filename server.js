@@ -11,8 +11,11 @@ var express = require('express.io')
   , request = require('request')
   , cheerio = require('cheerio')
   , openid = require('openid')
-  , relyingParty = new openid.RelyingParty(baseURL + '/!/auth', baseURL, true, false, []);
+  , relyingParty = new openid.RelyingParty(baseURL + '/!/auth', baseURL, true, false, [])
+  , stars = require('./data/stars.js');
 app.http().io();
+
+console.dir(stars)
 
 var appDB = {};
 
@@ -216,7 +219,7 @@ app.io.route('?', function(req) {
         appDB[appID] = appEntry;
       }
     });
-    req.io.emit('u', {name: name, profile: req.data, games: games});
+    req.io.emit('u', {name: name, profile: req.data, games: games, star: stars.indexOf(req.data) >= 0});
   });
 })
 
@@ -253,7 +256,7 @@ app.io.route('owned?', function(req) {
           // trading card profile
           name = $('.profile_small_header_name').text().trim();
 
-        req.io.emit('owned!', {profile: req.data, games: owned, name: name});
+        req.io.emit('owned!', {profile: req.data, games: owned, name: name, star: stars.indexOf(req.data) >= 0});
       } catch(e) {
         console.log('Error when trying to work with:')
         console.log(res)

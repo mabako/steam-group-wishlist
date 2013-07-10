@@ -5,6 +5,9 @@ body {
   color: #000;
   text-decoration: none;
 }
+a.star {
+  background: #feffe5;
+}
 .cnt, .pr {
   float: left;
 }
@@ -49,5 +52,6 @@ img {
   color: #fff;
 }
 .ppl a + a:before {
+  background: #fff;
   content: ", ";
 }
