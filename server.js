@@ -122,7 +122,7 @@ app.io.route('Hi-diddly-ho, neighborino', function(req) {
 });
 
 // Fetches all groups of a user along with his name
-function fetchGroups(id, func) {
+function fetchGroups(id, res, func) {
   fetchBase('http://steamcommunity.com/profiles/' + id + '/groups', function(err, content) {
     if(err) {
       res.writeHead(500);
@@ -148,7 +148,7 @@ app.get('/!/check', function(req, res) {
   var id = req.signedCookies.id;
   var selected = req.params.group || 'friends';
   if(id) {
-    fetchGroups(id, function(profileName, groups) {
+    fetchGroups(id, res, function(profileName, groups) {
       res.render('sel.jade', {groups: groups, id: id, selected: selected, gr: req.params.group});
     });
   } else {
@@ -266,7 +266,7 @@ app.get('/group/:name', function(req, res) {
 app.get('/', function(req, res) {
   var id = req.signedCookies.id;
   if(id) {
-    fetchGroups(id, function(profileName, groups) {
+    fetchGroups(id, res, function(profileName, groups) {
       res.render('profile.jade', {name: profileName, groups: groups, id: id});
     });
   } else {
