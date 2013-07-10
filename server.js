@@ -123,8 +123,10 @@ app.io.route('Hi-diddly-ho, neighborino', function(req) {
 
 // Fetches all groups of a user along with his name
 function fetchGroups(id, res, func) {
+  console.log('Fetching groups for profile ' + id);
   fetchBase('http://steamcommunity.com/profiles/' + id + '/groups', function(err, content) {
     if(err) {
+      console.log(err);
       res.writeHead(500);
       res.end();
     } else {
