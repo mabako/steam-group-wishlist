@@ -15,8 +15,6 @@ var express = require('express.io')
   , stars = require('./data/stars.js');
 app.http().io();
 
-console.dir(stars)
-
 var appDB = {};
 
 function fetchBase(url, func) {
