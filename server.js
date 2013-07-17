@@ -234,30 +234,34 @@ var matchOwnedGamesStart = 'var rgGames = ';
 var matchOwnedGamesEnd = '];';
 app.io.route('owned?', function(req) {
   fetchBase('http://steamcommunity.com/profiles/' + req.data + '/games?tab=all&l=english', function(err, res) {
-    var $ = cheerio.load(res);
-    if(res.indexOf('<div class="profile_private_info">') >= 0) {
-      req.io.emit('owned!', {profile: req.data, games: null, name: $('title').text().replace('Steam Community :: ','')});
+    if(err || !res) {
+      req.io.emit('owned!', {profile: req.data, games: null, name: '(?)'});
     } else {
-      // Well, this is awkward.
-      var start = res.indexOf(matchOwnedGamesStart) + matchOwnedGamesStart.length;
-      var end = res.indexOf(matchOwnedGamesEnd, start) + 1;
-      try {
-        var games = JSON.parse(res.substring(start, end));
-        var owned = {};
-        for(var i = 0; i < games.length; ++ i) {
-          owned[games[i].appid] = true;
+      var $ = cheerio.load(res);
+      if(res.indexOf('<div class="profile_private_info">') >= 0) {
+        req.io.emit('owned!', {profile: req.data, games: null, name: $('title').text().replace('Steam Community :: ','')});
+      } else {
+        // Well, this is awkward.
+        var start = res.indexOf(matchOwnedGamesStart) + matchOwnedGamesStart.length;
+        var end = res.indexOf(matchOwnedGamesEnd, start) + 1;
+        try {
+          var games = JSON.parse(res.substring(start, end));
+          var owned = {};
+          for(var i = 0; i < games.length; ++ i) {
+            owned[games[i].appid] = true;
+          }
+
+          // regular steam profile
+          var name = $('h1').text();
+          if(!name)
+            // trading card profile
+            name = $('.profile_small_header_name').text().trim();
+
+          req.io.emit('owned!', {profile: req.data, games: owned, name: name, star: stars.indexOf(req.data) >= 0});
+        } catch(e) {
+          console.log('Error when trying to work with:')
+          console.log(res)
         }
-
-        // regular steam profile
-        var name = $('h1').text();
-        if(!name)
-          // trading card profile
-          name = $('.profile_small_header_name').text().trim();
-
-        req.io.emit('owned!', {profile: req.data, games: owned, name: name, star: stars.indexOf(req.data) >= 0});
-      } catch(e) {
-        console.log('Error when trying to work with:')
-        console.log(res)
       }
     }
   });
