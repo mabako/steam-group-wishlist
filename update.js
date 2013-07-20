@@ -12,7 +12,7 @@ module.exports = {
     base.fetch('http://steamcommunity.com/' + url + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
       if(err) {
         console.log('Member fetching error for ' + url + '\n' + err);
-        req.io.emit('err', err);
+        req.io.emit('err', err.toString());
       } else {
         xml2js(content, function(err, res) {
           if(err || !res) {
@@ -27,7 +27,7 @@ module.exports = {
             res = res.memberList;
 
             if(res.currentPage == 1) {
-              base.title(req, res.groupDetails[0].groupName, req.data.index)
+              apps.title(req, res.groupDetails[0].groupName, req.data.index)
             }
             req.io.emit('m', res.members[0].steamID64);
             if(parseInt(res.currentPage) < parseInt(res.totalPages)) {
@@ -56,7 +56,7 @@ module.exports = {
         }
 
         res = res.friendsList;
-        base.title(req, 'Friends of ' + res.steamID, req.data.index);
+        apps.title(req, 'Friends of ' + res.steamID, req.data.index);
         req.io.emit('m', res.friends[0].friend);
         req.io.emit('k');
       })

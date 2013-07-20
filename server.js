@@ -5,9 +5,7 @@ console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 
 var express = require('express.io')
   , app = express()
-  , cheerio = require('cheerio')
   , auth = require('./auth.js')
-  , base = require('./base.js')
   , update = require('./update.js')
   , store = require('./store.js');
 app.http().io();

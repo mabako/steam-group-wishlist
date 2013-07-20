@@ -1,12 +1,6 @@
 var base = require('./base.js');
 
 module.exports = {
-  fetch: function(app, func) {
-    base.fetch('http://store.steampowered.com/app/' + app + '?l=english', function(err, res) {
-      func(err, res);
-    });
-  },
-
   search: function(req) {
     console.log('Looking up ' + req.data + ' in Store');
     fetchBase('http://store.steampowered.com/search/suggest?term=' + encodeURIComponent(req.data) + '&f=games&cc=US&l=english', function(err, res) {
