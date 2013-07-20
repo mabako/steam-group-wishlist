@@ -5,97 +5,15 @@ console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 
 var express = require('express.io')
   , app = express()
-  , xml2js = require('xml2js').parseString
   , cheerio = require('cheerio')
   , stars = require('./data/stars.js')
   , auth = require('./auth.js')
   , base = require('./base.js')
+  , update = require('./update.js')
   , fetchBase = base.fetch;
 app.http().io();
 
 var appDB = {};
-
-function sendTitle(req, title, app) {
-  if(app) {
-    if(appDB[app]) {
-      title += ' - ' + appDB[req.data.index].name;
-      req.io.emit('t', title);
-    } else {
-      fetchBase('http://store.steampowered.com/app/' + app + '?l=english', function(err, res) {
-        if(!err) {
-          $ = cheerio.load(res);
-          var str = $('.apphub_AppName').text();
-          if(!str) {
-            var str = $('title').text();
-            str = str.substr(0, str.length - 8).trim();
-          }
-          title += ' - ' + str;
-          req.io.emit('t', title);
-        }
-      })
-    }
-  } else {
-    req.io.emit('t', title);
-  }
-}
-
-function memberlistUpdate(req, page) {
-  // numeric group id? they have different urls
-  var name = req.data.name;
-  var url = /^\d+$/.test(name) ? ('gid/' + name) : ('groups/' + name);
-  fetchBase('http://steamcommunity.com/' + url + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
-    if(err) {
-      console.log('Member fetching error for ' + url + '\n' + err);
-      return;
-    }
-
-    xml2js(content, function(err, res) {
-      if(err || !res) {
-        console.log('Member xml2js error for ' + url + '\n' + err);
-        // Steam error page maybe.
-        $ = cheerio.load(content);
-        var message = $('h3').text();
-        console.log('> ' + message);
-        req.io.emit('err', message);
-        return;
-      }
-      res = res.memberList;
-
-      if(res.currentPage == 1) {
-        sendTitle(req, res.groupDetails[0].groupName, req.data.index)
-      }
-      req.io.emit('m', res.members[0].steamID64);
-      if(parseInt(res.currentPage) < parseInt(res.totalPages)) {
-        memberlistUpdate(req, page + 1);
-      } else {
-        req.io.emit('k');
-      }
-    });
-  });
-}
-
-function friendsUpdate(req) {
-  var id = req.data.name.substr(8);
-  var url = /^\d+$/.test(id) ? ('profiles/' + id) : ('id/' + id);
-  fetchBase('http://steamcommunity.com/' + url + '/friends/?xml=1', function(err, content) {
-    if(err) {
-      console.log('Friends fetching error for ' + url + '\n' + err);
-      return;
-    }
-    
-    xml2js(content, function(err, res) {
-      if(err || !res || !res.friendsList) {
-        console.log('Friends xml2js error for ' + url + '\n' + err);
-        return;
-      }
-
-      res = res.friendsList;
-      sendTitle(req, 'Friends of ' + res.steamID, req.data.index);
-      req.io.emit('m', res.friends[0].friend);
-      req.io.emit('k');
-    })
-  });
-}
 
 // Static files
 app.use(express.static(__dirname + '/static'));
@@ -111,9 +29,9 @@ app.use(express.cookieParser('6-1e8-4D_Z-1!t91@_aS.@l-x-IM2#4_1$-_"4_01/)+-nM_d;
 app.io.route('Hi-diddly-ho, neighborino', function(req) {
   console.log('Fetching info: ' + req.data.name + ', app:' + req.data.index);
   if(req.data.name.substr(0, 8) == 'friends/') {
-    friendsUpdate(req);
+    update.friends(req);
   } else {
-    memberlistUpdate(req, 1);
+    update.members(req, 1);
   }
 });
 

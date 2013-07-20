@@ -1,5 +1,6 @@
 var request = require('request')
-  , cheerio = require('cheerio');
+  , cheerio = require('cheerio')
+  , apps = require('./apps.js');
 
 module.exports = {
   // Loads arbitrary websites.
@@ -30,5 +31,19 @@ module.exports = {
         func(null, name, groups);
       }
     });
+  },
+
+  // Updates the title shown on the page.
+  title: function (req, title, app) {
+    if(app) {
+      apps.getName(app, function(err, name) {
+        if(!err)
+          req.io.emit('t', title + ' - ' + name);
+        else
+          req.io.emit('t', title);
+      });
+    } else {
+      req.io.emit('t', title);
+    }
   }
 };
