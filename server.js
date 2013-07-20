@@ -1,27 +1,19 @@
 #!/bin/env node
 
-var baseURL = 'http://swl.mabako.net';
-
 require('log-timestamp')
 console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 
 var express = require('express.io')
   , app = express()
   , xml2js = require('xml2js').parseString
-  , request = require('request')
   , cheerio = require('cheerio')
-  , openid = require('openid')
-  , relyingParty = new openid.RelyingParty(baseURL + '/!/auth', baseURL, true, false, [])
-  , stars = require('./data/stars.js');
+  , stars = require('./data/stars.js')
+  , auth = require('./auth.js')
+  , base = require('./base.js')
+  , fetchBase = base.fetch;
 app.http().io();
 
 var appDB = {};
-
-function fetchBase(url, func) {
-  request(url, function(err, res, body) {
-    func(err, body);
-  }).end();
-}
 
 function sendTitle(req, title, app) {
   if(app) {
@@ -124,30 +116,6 @@ app.io.route('Hi-diddly-ho, neighborino', function(req) {
     memberlistUpdate(req, 1);
   }
 });
-
-// Fetches all groups of a user along with his name
-function fetchGroups(id, res, func) {
-  console.log('Fetching groups for profile ' + id);
-  fetchBase('http://steamcommunity.com/profiles/' + id + '/groups', function(err, content) {
-    if(err) {
-      console.log(err);
-      res.writeHead(500);
-      res.end();
-    } else {
-      $ = cheerio.load(content);
-
-      var name = $('h1').text();
-      var groups = [];
-      $('a.linkTitle').each(function(i, elem) {
-        var obj = $(this);
-        var link = obj.attr('href');
-        link = link.substr(link.lastIndexOf('/') + 1);
-        groups[groups.length] = {url: link, name: obj.text()};
-      });
-      func(name, groups);
-    }
-  });
-}
 
 // Searching for a game
 app.get('/!/check', function(req, res) {
@@ -273,46 +241,10 @@ app.get('/group/:name', function(req, res) {
 });
 
 // Login
-app.get('/', function(req, res) {
-  var id = req.signedCookies.id;
-  if(id) {
-    fetchGroups(id, res, function(profileName, groups) {
-      res.render('profile.jade', {name: profileName, groups: groups, id: id});
-    });
-  } else {
-    res.render('login.jade');
-  }
-});
-
-app.get('/!/auth', function(req, res) {
-  relyingParty.verifyAssertion(req, function(error, result) {
-    if(!error && result.authenticated) {
-      res.cookie('id', result.claimedIdentifier.replace('http://steamcommunity.com/openid/id/', ''), { signed: true });
-      res.redirect('/');
-    } else {
-      res.end('Failed: ' + error.message);
-    }
-  });
-});
-
-app.get('/!/logout', function(req, res) {
-  res.cookie('id', '');
-  res.redirect('/');
-});
-
-app.get('/!', function(req, res) {
-  relyingParty.authenticate('http://steamcommunity.com/openid', false, function(err, u) {
-    if(err) {
-      res.writeHead(200);
-      res.end('Failed: ' + err.message);
-    } else if(!u) {
-      res.writeHead(200);
-      res.end('Failed.');
-    } else {
-      res.redirect(u);
-    }
-  });
-});
+app.get('/', auth.home);
+app.get('/!', auth.openid);
+app.get('/!/auth', auth.verify);
+app.get('/!/logout', auth.logout);
 
 // Donating... just static, really.
 app.get('/!/donate', function(req, res) {
