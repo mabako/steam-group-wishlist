@@ -1,9 +1,10 @@
-var base = require('./base.js');
+var base = require('./base.js')
+  , cheerio = require('cheerio');
 
 module.exports = {
   search: function(req) {
     console.log('Looking up ' + req.data + ' in Store');
-    fetchBase('http://store.steampowered.com/search/suggest?term=' + encodeURIComponent(req.data) + '&f=games&cc=US&l=english', function(err, res) {
+    base.fetch('http://store.steampowered.com/search/suggest?term=' + encodeURIComponent(req.data) + '&f=games&cc=US&l=english', function(err, res) {
       if(err || !res) {
         req.io.emit('storesearched', {input: req.data, result: []});
       } else {
