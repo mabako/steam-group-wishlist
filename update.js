@@ -1,6 +1,8 @@
 var base = require('./base')
   , xml2js = require('xml2js').parseString
-  , cheerio = require('cheerio');
+  , cheerio = require('cheerio')
+  , apps = require('./apps.js')
+  , stars = require('./data/stars.js');
 
 module.exports = {
   members: function(req, page) {
@@ -59,5 +61,36 @@ module.exports = {
         req.io.emit('k');
       })
     });
+  },
+
+  // Grab a wishlist for a single person.
+  wishlist: function(req) {
+    base.fetch('http://steamcommunity.com/profiles/' + req.data + '/wishlist?cc=us', function(err, res) {
+      $ = cheerio.load(res);
+
+      // trading card profile
+      var name = $('.profile_small_header_name').text().trim();
+
+      var games = [];
+      $('.wishlistRow').each(function(i, elem) {
+        // Reduce this to the App ID
+        var obj = $(this);
+        var appLink = obj.find('.gameLogo').children('a').first();
+        var appID = parseInt(appLink.attr('href').substr(30));
+        games[i] = appID;
+
+        // ensure an entry in our app db.
+        apps.update(appID, obj, appLink);
+      });
+      req.io.emit('u', {name: name, profile: req.data, games: games, star: stars.indexOf(req.data) >= 0});
+    });
+  },
+  // Game info for the wishlist
+  games: function(req) {
+    requested = {};
+    for(var i = 0; i < req.data.fetch.length; ++ i) {
+      requested[req.data.fetch[i]] = apps.get(req.data.fetch[i]);
+    }
+    req.io.emit('games!', {games: requested, profile: req.data.profile});
   }
 }

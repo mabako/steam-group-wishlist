@@ -6,7 +6,6 @@ console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
 var express = require('express.io')
   , app = express()
   , cheerio = require('cheerio')
-  , stars = require('./data/stars.js')
   , auth = require('./auth.js')
   , base = require('./base.js')
   , update = require('./update.js')
@@ -74,46 +73,8 @@ app.io.route('storesearch', function(req) {
 })
 
 // Ask for the wishlist of a single person.
-app.io.route('?', function(req) {
-  fetchBase('http://steamcommunity.com/profiles/' + req.data + '/wishlist?cc=us', function(err, res) {
-    $ = cheerio.load(res);
-
-    // regular steam profile
-    var name = $('h1').text();
-    if(!name)
-      // trading card profile
-      name = $('.profile_small_header_name').text().trim();
-
-    var games = [];
-    $('.wishlistRow').each(function(i, elem) {
-      // Reduce this to the App ID
-      var obj = $(this);
-      var appLink = obj.find('.gameLogo').children('a').first();
-      var appID = parseInt(appLink.attr('href').substr(30));
-      games[i] = appID;
-
-      // ensure an entry in our app db.
-      // TODO this shud prolly be purged somewhere somehow.
-      // TODO Deals?
-      if(appDB[appID] == undefined) {
-        var price = obj.find('.price').text().trim();
-        if(price == '') price = obj.find('.discount_original_price').text();
-        if(price == '') price = 'N/A';
-        var appEntry = {name: obj.find('h4').text(), price: price, image: appLink.find('img').attr('src')};
-        appDB[appID] = appEntry;
-      }
-    });
-    req.io.emit('u', {name: name, profile: req.data, games: games, star: stars.indexOf(req.data) >= 0});
-  });
-})
-
-app.io.route('games?', function(req) {
-  requested = {};
-  for(var i = 0; i < req.data.fetch.length; ++ i) {
-    requested[req.data.fetch[i]] = appDB[req.data.fetch[i]];
-  }
-  req.io.emit('games!', {games: requested, profile: req.data.profile});
-});
+app.io.route('?', update.wishlist);
+app.io.route('games?', update.games);
 
 // ask for the owned games of a single person
 var matchOwnedGamesStart = 'var rgGames = ';
