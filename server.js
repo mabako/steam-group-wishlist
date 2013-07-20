@@ -31,17 +31,7 @@ app.io.route('Hi-diddly-ho, neighborino', function(req) {
 });
 
 // Searching for a game
-app.get('/!/check', function(req, res) {
-  var id = req.signedCookies.id;
-  var selected = req.params.group || 'friends';
-  if(id) {
-    fetchGroups(id, res, function(profileName, groups) {
-      res.render('sel.jade', {groups: groups, id: id, selected: selected, gr: req.params.group});
-    });
-  } else {
-    res.render('sel.jade', {groups: [], id: null, selected: selected, gr: req.params.group});
-  }
-});
+app.get('/!/check', auth.groupcheck);
 
 app.io.route('storesearch', store.search);
 
