@@ -1,5 +1,5 @@
 $(function() {
-  io = io.connect((window.location.hostname == 'swl.mabako.net' || window.location.hostname.indexOf('rhcloud.com') > 0) ? (window.location.hostname + ':8000') : null);
+  io = io.connect((window.location.hostname == 'swl.mabako.net' || window.location.hostname == 'steamwishlist.mabako.net' || window.location.hostname.indexOf('rhcloud.com') > 0) ? (window.location.hostname + ':8000') : null);
 
   var lastSearched = '';
   io.on('storesearched', function(data) {
