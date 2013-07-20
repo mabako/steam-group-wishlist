@@ -1,4 +1,4 @@
-var base = require('./base.js');
+var store = require('./store.js');
 
 var appDB = {};
 
@@ -13,7 +13,7 @@ module.exports = {
     if(appDB[app]) {
       func(null, appDB[app].name);
     } else {
-      base.fetch('http://store.steampowered.com/app/' + app + '?l=english', function(err, res) {
+      store.fetch(app, function(err, res) {
         if(!err) {
           $ = cheerio.load(res);
           var str = $('.apphub_AppName').text();

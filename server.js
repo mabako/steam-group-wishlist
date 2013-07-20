@@ -9,7 +9,7 @@ var express = require('express.io')
   , auth = require('./auth.js')
   , base = require('./base.js')
   , update = require('./update.js')
-  , fetchBase = base.fetch;
+  , store = require('./store.js');
 app.http().io();
 
 var appDB = {};
@@ -47,72 +47,14 @@ app.get('/!/check', function(req, res) {
   }
 });
 
-app.io.route('storesearch', function(req) {
-  console.log('Looking up ' + req.data + ' in Store');
-  fetchBase('http://store.steampowered.com/search/suggest?term=' + encodeURIComponent(req.data) + '&f=games&cc=US&l=english', function(err, res) {
-    if(err || !res) {
-      req.io.emit('storesearched', {input: req.data, result: []});
-    } else {
-      $ = cheerio.load(res);
-
-      var results = [];
-      $('a').each(function(i, elem) {
-        var obj = $(this);
-
-        var link = obj.attr('href').replace('http://store.steampowered.com/app/', '');
-        link = link.substr(0, link.indexOf('/'));
-
-        var text = obj.find('.match_name').text();
-        if((''+parseInt(link)).length == link.length && text.indexOf('Free DLC') == -1 && text.indexOf('Prima Official Strategy Guide') == -1 && !(/\b(Demo)\b/ig).test(text)) {
-          results[results.length] = {app: parseInt(link), name: text}
-        }
-      });
-      req.io.emit('storesearched', {input: req.data, result: results});
-    }
-  });
-})
+app.io.route('storesearch', store.search);
 
 // Ask for the wishlist of a single person.
 app.io.route('?', update.wishlist);
 app.io.route('games?', update.games);
 
 // ask for the owned games of a single person
-var matchOwnedGamesStart = 'var rgGames = ';
-var matchOwnedGamesEnd = '];';
-app.io.route('owned?', function(req) {
-  fetchBase('http://steamcommunity.com/profiles/' + req.data + '/games?tab=all&l=english', function(err, res) {
-    if(err || !res) {
-      req.io.emit('owned!', {profile: req.data, games: null, name: '(?)'});
-    } else {
-      var $ = cheerio.load(res);
-      if(res.indexOf('<div class="profile_private_info">') >= 0) {
-        req.io.emit('owned!', {profile: req.data, games: null, name: $('title').text().replace('Steam Community :: ','')});
-      } else {
-        // Well, this is awkward.
-        var start = res.indexOf(matchOwnedGamesStart) + matchOwnedGamesStart.length;
-        var end = res.indexOf(matchOwnedGamesEnd, start) + 1;
-        try {
-          var games = JSON.parse(res.substring(start, end));
-          var owned = {};
-          for(var i = 0; i < games.length; ++ i) {
-            owned[games[i].appid] = true;
-          }
-
-          // regular steam profile
-          var name = $('h1').text();
-          if(!name)
-            // trading card profile
-            name = $('.profile_small_header_name').text().trim();
-
-          req.io.emit('owned!', {profile: req.data, games: owned, name: name, star: stars.indexOf(req.data) >= 0});
-        } catch(e) {
-          console.log('Error when trying to work with:')
-          console.log(res)
-        }
-      }
-    }
-  });
-});
+app.io.route('owned?', update.owned);
 
 // Redirect all /group/* to /*
 app.get('/group/:name', function(req, res) {

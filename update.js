@@ -92,5 +92,44 @@ module.exports = {
       requested[req.data.fetch[i]] = apps.get(req.data.fetch[i]);
     }
     req.io.emit('games!', {games: requested, profile: req.data.profile});
+  },
+
+  // Check if this game is owned by this person in particular.
+  owned: function(req) {
+    var matchOwnedGamesStart = 'var rgGames = ';
+    var matchOwnedGamesEnd = '];';
+    base.fetch('http://steamcommunity.com/profiles/' + req.data + '/games?tab=all&l=english', function(err, res) {
+      if(err || !res) {
+        req.io.emit('owned!', {profile: req.data, games: null, name: '(?)'});
+      } else {
+        var $ = cheerio.load(res);
+        if(res.indexOf('<div class="profile_private_info">') >= 0) {
+          req.io.emit('owned!', {profile: req.data, games: null, name: $('title').text().replace('Steam Community :: ','')});
+        } else {
+          // Well, this is awkward.
+          var start = res.indexOf(matchOwnedGamesStart) + matchOwnedGamesStart.length;
+          var end = res.indexOf(matchOwnedGamesEnd, start) + 1;
+          try {
+            var games = JSON.parse(res.substring(start, end));
+            var owned = {};
+            for(var i = 0; i < games.length; ++ i) {
+              owned[games[i].appid] = true;
+            }
+
+            // regular steam profile
+            var name = $('h1').text();
+            if(!name)
+              // trading card profile
+              name = $('.profile_small_header_name').text().trim();
+
+            req.io.emit('owned!', {profile: req.data, games: owned, name: name, star: stars.indexOf(req.data) >= 0});
+          } catch(e) {
+            console.log('Error when trying to work with:');
+            console.log(res);
+            console.log('Error: ' + e)
+          }
+        }
+      }
+    });
   }
 }
