@@ -48,3 +48,8 @@ module.exports = {
     }
   }
 }
+
+// Clear cached apps once in a bluemoon
+setInterval(function() {
+  appDB = {};
+}, 1000 * 6 * 60 * 60)

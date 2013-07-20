@@ -10,8 +10,6 @@ var express = require('express.io')
   , store = require('./store.js');
 app.http().io();
 
-var appDB = {};
-
 // Static files
 app.use(express.static(__dirname + '/static'));
 // moreso dynamic content
@@ -92,8 +90,3 @@ var ip = process.env.OPENSHIFT_NODEJS_IP || process.env.IP || '127.0.0.1'
 var port = process.env.OPENSHIFT_INTERNAL_PORT || process.env.PORT || 8080;
 app.listen(port, ip);
 console.log('Lets listen on ' + ip + ':' + port);
-
-// Clear cached apps once in a bluemoon
-setInterval(function() {
-  appDB = {};
-}, 1000 * 6 * 60 * 60)
