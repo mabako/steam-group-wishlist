@@ -30,7 +30,12 @@ module.exports = {
   update: function(appID, obj, appLink) {
     if(appDB[appID] == undefined) {
       var price = obj.find('.price').text().trim() || obj.find('.discount_original_price').text() || 'N/A';
-      appDB[appID] = {name: obj.find('h4').text(), price: price, image: appLink.find('img').attr('src')};
+
+      var image = appLink.find('img').attr('src');
+      if(image == 'http://media.steampowered.com/steamcommunity/public/images/avatars/33/338200c5d6c4d9bdcf6632642a2aeb591fb8a5c2.gif')
+        image = 'http://cdn.steampowered.com/v/gfx/apps/' + appID + '/header.jpg';
+
+      appDB[appID] = {name: obj.find('h4').text(), price: price, image: image};
     }
   },
 

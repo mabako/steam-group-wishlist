@@ -23,6 +23,10 @@ img {
   padding-right: 5px;
   border: 0px;
 }
+#games img {
+  width: 184px;
+  height: 69px;
+}
 #haz, #haznot, #private {
   clear: both;
   padding-top: 5px;
