@@ -25,6 +25,8 @@ app.io.route('Hi-diddly-ho, neighborino', function(req) {
   console.log('Fetching info: ' + req.data.name + ', app:' + req.data.index);
   if(req.data.name.substr(0, 8) == 'friends/') {
     update.friends(req);
+  } else if(req.data.name.substr(0, 7) == 'people/') {
+    update.list(req);
   } else {
     update.members(req, 1);
   }
@@ -66,6 +68,14 @@ app.get('/friends/:user' + nameregex + '/:app(\\d+)', function(req, res) {
 
 app.get('/friends/:user' + nameregex, function(req, res) {
   res.render('wishlist.jade', {group: 'friends/' + req.params.user});
+});
+
+app.get('/people/:people/:app(\\d+)', function(req, res) {
+  res.render('check.jade', {group: 'people/' + req.params.people, app: req.params.app});
+});
+
+app.get('/people/:people', function(req, res) {
+  res.render('wishlist.jade', {group: 'people/' + req.params.people});
 });
 
 app.get('/:group' + nameregex + '/:app(\\d+)', function(req, res) {

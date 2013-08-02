@@ -42,6 +42,7 @@ module.exports = {
       });
     })(req, page);
   },
+
   friends: function(req) {
     var id = req.data.name.substr(8);
     var url = /^\d+$/.test(id) ? ('profiles/' + id) : ('id/' + id);
@@ -65,9 +66,17 @@ module.exports = {
     });
   },
 
+  list: function(req) {
+    var ids = req.data.name.substr(7).split(',');
+    apps.title(req, 'VS', req.data.index);
+    req.io.emit('m', ids);
+    req.io.emit('k');
+  },
+
   // Grab a wishlist for a single person.
   wishlist: function(req) {
-    base.fetch('http://steamcommunity.com/profiles/' + req.data + '/wishlist?cc=us', function(err, res) {
+    var url = /^\d+$/.test(req.data) ? ('profiles/' + req.data) : ('id/' + req.data);
+    base.fetch('http://steamcommunity.com/' + url + '/wishlist?cc=us', function(err, res) {
       $ = cheerio.load(res);
 
       // trading card profile
@@ -100,7 +109,8 @@ module.exports = {
   owned: function(req) {
     var matchOwnedGamesStart = 'var rgGames = ';
     var matchOwnedGamesEnd = '];';
-    base.fetch('http://steamcommunity.com/profiles/' + req.data + '/games?tab=all&l=english', function(err, res) {
+    var url = /^\d+$/.test(req.data) ? ('profiles/' + req.data) : ('id/' + req.data);
+    base.fetch('http://steamcommunity.com/' + url + '/games?tab=all&l=english', function(err, res) {
       if(err || !res) {
         req.io.emit('owned!', {profile: req.data, games: null, name: '(?)'});
       } else {
