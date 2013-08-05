@@ -9,7 +9,7 @@ module.exports = {
     (function rec(req, page){
       // numeric group id? they have different urls
       var name = req.data.name;
-      var url = /^\d+$/.test(name) ? ('gid/' + name) : ('groups/' + name);
+      var url = /^\d{18}$/.test(name) ? ('gid/' + name) : ('groups/' + name);
       base.fetch('http://steamcommunity.com/' + url + '/memberslistxml/?xml=1&p=' + page, function(err, content) {
         if(err) {
           console.log('Member fetching error for ' + url + '\n' + err);
@@ -45,7 +45,7 @@ module.exports = {
 
   friends: function(req) {
     var id = req.data.name.substr(8);
-    var url = /^\d+$/.test(id) ? ('profiles/' + id) : ('id/' + id);
+    var url = /^\d{17}$/.test(id) ? ('profiles/' + id) : ('id/' + id);
     base.fetch('http://steamcommunity.com/' + url + '/friends/?xml=1', function(err, content) {
       if(err) {
         console.log('Friends fetching error for ' + url + '\n' + err);
@@ -75,8 +75,14 @@ module.exports = {
 
   // Grab a wishlist for a single person.
   wishlist: function(req) {
-    var url = /^\d+$/.test(req.data) ? ('profiles/' + req.data) : ('id/' + req.data);
+    var url = /^\d{17}$/.test(req.data) ? ('profiles/' + req.data) : ('id/' + req.data);
     base.fetch('http://steamcommunity.com/' + url + '/wishlist?cc=us', function(err, res) {
+      var ignore;
+      if(err) {
+        console.log('Error when fetching ' + url + ': ' + err);
+        req.io.emit('err', 'Error when fetching ' + url + ': ' + err);
+        ignore = true;
+      }
       $ = cheerio.load(res);
 
       // trading card profile
@@ -93,7 +99,7 @@ module.exports = {
         // ensure an entry in our app db.
         apps.update(appID, obj, appLink);
       });
-      req.io.emit('u', {name: name, profile: req.data, games: games, star: stars.indexOf(req.data) >= 0});
+      req.io.emit('u', {name: name, profile: req.data, games: games, star: stars.indexOf(req.data) >= 0, ignore: ignore});
     });
   },
   // Game info for the wishlist
@@ -109,7 +115,7 @@ module.exports = {
   owned: function(req) {
     var matchOwnedGamesStart = 'var rgGames = ';
     var matchOwnedGamesEnd = '];';
-    var url = /^\d+$/.test(req.data) ? ('profiles/' + req.data) : ('id/' + req.data);
+    var url = /^\d{17}$/.test(req.data) ? ('profiles/' + req.data) : ('id/' + req.data);
     base.fetch('http://steamcommunity.com/' + url + '/games?tab=all&l=english', function(err, res) {
       if(err || !res) {
         req.io.emit('owned!', {profile: req.data, games: null, name: '(?)'});

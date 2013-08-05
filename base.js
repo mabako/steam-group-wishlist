@@ -4,7 +4,7 @@ var request = require('request')
 module.exports = {
   // Loads arbitrary websites.
   fetch: function(url, func) {
-    request({url:url, timeout: 3000}, function(err, res, body) {
+    request({url:url, timeout: 6000}, function(err, res, body) {
       func(err, body);
     }).end();
   },

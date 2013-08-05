@@ -10,7 +10,7 @@ start = function(groupName, app) {
     function processCurrentMember(data) {
       updateCounter();
       processNext();
-      var url = /^\d+$/.test(data.profile) ? ('profiles/' + data.profile) : ('id/' + data.profile);
+      var url = /^\d{17}$/.test(data.profile) ? ('profiles/' + data.profile) : ('id/' + data.profile);
       var linktext = '<a href="http://steamcommunity.com/' + url + '/" target="_blank"' +
         (data.star ? ' class="star"' : '') + '>' + data.name + '</a>';
       var container = 'haznot'
