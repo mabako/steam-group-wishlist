@@ -45,8 +45,13 @@ $(function() {
     var app = $('input[name=app]:checked').attr('data-app');
 
     var link = '#';
-    if(group && app) {
-      link = '/' + group + '/' + app;
+    if($('input[name=group]').length > 0) {
+      if('history' in window && 'replaceState' in window.history && window.history['replaceState'] !== null) {
+        window.history.replaceState({}, '', '/' + (group || '!') + '/check');
+      }
+      if(group && app) {
+        link = '/' + group + '/' + app;
+      }
     } else if(friends.length > 0) {
       friends.each(function() {
         var url = $(this).attr('data-url');

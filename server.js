@@ -67,6 +67,8 @@ app.get('/friends/:user' + nameregex + '/:app(\\d+)', function(req, res) {
   res.render('check.jade', {group: 'friends/' + req.params.user, app: req.params.app});
 });
 
+app.get('/friends/:user' + nameregex + '/check', auth.groupcheck);
+
 app.get('/friends/:user' + nameregex, function(req, res) {
   res.render('wishlist.jade', {group: 'friends/' + req.params.user});
 });
@@ -84,6 +86,8 @@ app.get('/people', auth.selectfriends);
 app.get('/:group' + nameregex + '/:app(\\d+)', function(req, res) {
   res.render('check.jade', {group: req.params.group, app: req.params.app});
 })
+
+app.get('/:group' + nameregex + '/check', auth.groupcheck);
 
 app.get('/:group' + nameregex, function(req, res) {
   res.render('wishlist.jade', {group: req.params.group});

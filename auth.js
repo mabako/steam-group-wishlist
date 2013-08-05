@@ -50,17 +50,20 @@ module.exports = {
     res.redirect('/');
   },
   groupcheck: function(req, res) {
-    var id = req.signedCookies.steamID;
-    var selected = req.params.group || 'friends';
-    if(id) {
-      base.groups(id, res, function(err, profileName, groups) {
-        if(!err)
-          res.render('sel.jade', {groups: groups, id: id, selected: selected, gr: req.params.group});
-        else
-        res.render('sel.jade', {groups: [], id: null, selected: selected, gr: req.params.group});
-      });
+    if(req.params.group || req.params.user) {
+      res.render('sel.jade', {groups: [], id: null, groupid: req.params.group || ('friends/' + req.params.user)});
     } else {
-      res.render('sel.jade', {groups: [], id: null, selected: selected, gr: req.params.group});
+      var id = req.signedCookies.steamID;
+      if(id) {
+        base.groups(id, res, function(err, profileName, groups) {
+          if(!err)
+            res.render('sel.jade', {groups: groups, id: id, groupid: null});
+          else
+          res.render('sel.jade', {groups: [], id: null, groupid: null});
+        });
+      } else {
+        res.render('sel.jade', {groups: [], id: null, groupid: null});
+      }
     }
   },
   selectfriends: function(req, res) {
