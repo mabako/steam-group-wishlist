@@ -1,7 +1,7 @@
 #!/bin/env node
 
 require('log-timestamp')
-console.log('SWL -> https://github.com/mabako/steam-group-wishlist');
+console.log('SWL ' + require('./package.json').version + ' -> https://github.com/mabako/steam-group-wishlist');
 
 var express = require('express.io')
   , app = express()
