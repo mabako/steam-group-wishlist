@@ -54,7 +54,6 @@ app.get('/', auth.home);
 app.get('/!', auth.openid);
 app.get('/!/auth', auth.verify);
 app.get('/!/logout', auth.logout);
-app.get('/!/friends', auth.selectfriends);
 
 
 // Donating... just static, really.
@@ -79,6 +78,8 @@ app.get('/people/:people/:app(\\d+)', function(req, res) {
 app.get('/people/:people', function(req, res) {
   res.render('wishlist.jade', {group: 'people/' + req.params.people});
 });
+
+app.get('/people', auth.selectfriends);
 
 app.get('/:group' + nameregex + '/:app(\\d+)', function(req, res) {
   res.render('check.jade', {group: req.params.group, app: req.params.app});
