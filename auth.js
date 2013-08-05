@@ -51,7 +51,7 @@ module.exports = {
   },
   groupcheck: function(req, res) {
     if(req.params.group || req.params.user || req.params.people) {
-      res.render('sel.jade', {groups: [], id: null, groupid: req.params.group ? req.params.group : req.params.user ? ('friends/' + req.params.user) : ('people/' + req.params.people)});
+      res.render('sel.jade', {groups: [], id: null, groupid: req.params.group || req.params.user ? ('friends/' + req.params.user) : ('people/' + req.params.people)});
     } else {
       var id = req.signedCookies.steamID;
       if(id) {
