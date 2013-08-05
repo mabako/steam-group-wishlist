@@ -1,5 +1,6 @@
 var base = require('./base.js')
-  , openid = require('openid');
+  , openid = require('openid')
+  , cheerio = require('cheerio');
 
 // Since these have to be domain-independent, we rather store a dynamic (small) amount of things here.
 var _relyingParties = {};
@@ -60,6 +61,27 @@ module.exports = {
       });
     } else {
       res.render('sel.jade', {groups: [], id: null, selected: selected, gr: req.params.group});
+    }
+  },
+  selectfriends: function(req, res) {
+    var id = req.signedCookies.steamID;
+    if(id) {
+      base.fetch('http://steamcommunity.com/profiles/' + id + '/friends', function(err, body) {
+        if(!err) {
+          $ = cheerio.load(body);
+          var friends = [];
+          $('.friendBlock').each(function(i, elem) {
+            var obj = $(this);
+            friends[i] = { url: obj.find('a').attr('href').replace(/http:\/\/steamcommunity\.com\/(id|profiles)\//, ''), name: obj.find('.friendBlockContent').text().substr(6).split("\r")[0] }
+          });
+          friends.sort(function(a, b) { return a.name == b.name ? 0 : a.name < b.name ? -1 : 1 })
+          res.render('selfriends.jade', {friends: friends});
+        } else {
+          res.redirect('/');
+        }
+      });
+    } else {
+      res.redirect('/');
     }
   }
 };

@@ -54,6 +54,8 @@ app.get('/', auth.home);
 app.get('/!', auth.openid);
 app.get('/!/auth', auth.verify);
 app.get('/!/logout', auth.logout);
+app.get('/!/friends', auth.selectfriends);
+
 
 // Donating... just static, really.
 app.get('/!/donate', function(req, res) {

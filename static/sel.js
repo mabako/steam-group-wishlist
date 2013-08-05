@@ -41,13 +41,26 @@ $(function() {
   // Selecting a group
   function updateLink() {
     var group = $('input[name=group]:checked').attr('data-url');
+    var friends = $('input[name=friend]:checked');
     var app = $('input[name=app]:checked').attr('data-app');
-    console.log('App = ' + app);
-    console.log('Group = ' + group);
-    $('#sel').attr('href', (group && app) ? ('/' + group + '/' + app) : '#');
+
+    var link = '#';
+    if(group && app) {
+      link = '/' + group + '/' + app;
+    } else if(friends.length > 0) {
+      friends.each(function() {
+        var url = $(this).attr('data-url');
+        link = link == '#' ? ('/people/' + url) : (link + ',' + url)
+      });
+      if(app) {
+        link += '/' + app;
+      }
+    }
+    $('#sel').attr('href', link);
   }
   $('#auto').change(updateLink);
   $('input[name=group]').change(updateLink);
+  $('input[name=friend]').change(updateLink);
 
   $('#g2').bind('keyup change', function() {
     $('#g1').attr('data-url', $('#g2').val());

@@ -1,0 +1,22 @@
+extends homelayout
+
+block head_
+  script(src='//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js')
+  script(src='/socket.io/socket.io.js')
+  script(src='/sel.js')
+
+block content
+  #ga
+    p Pick a game (DLCs may not work)
+    p
+      input(type='text',name='game',value='',placeholder='Enter a game',id='game')
+    .list.left.nom#auto
+  #gr
+    .list.left.nom
+      each friend in friends
+        p
+          input(type='checkbox',name='friend',value=friend.name,id='f_'+friend.url,data-url=friend.url)
+          label(for='f_'+friend.url)= friend.name
+  div
+    p
+      a(href='#',id='sel') Check >
