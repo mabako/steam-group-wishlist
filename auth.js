@@ -74,7 +74,7 @@ module.exports = {
             var obj = $(this);
             friends[i] = { url: obj.find('a').attr('href').replace(/http:\/\/steamcommunity\.com\/(id|profiles)\//, ''), name: obj.find('.friendBlockContent').text().substr(6).split("\r")[0] }
           });
-          friends.sort(function(a, b) { return a.name == b.name ? 0 : a.name < b.name ? -1 : 1 })
+          friends.sort(function(a, b) { return a.name.toLowerCase() == b.name.toLowerCase() ? 0 : a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1 })
           res.render('selfriends.jade', {friends: friends});
         } else {
           res.redirect('/');
