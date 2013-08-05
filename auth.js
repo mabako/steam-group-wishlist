@@ -50,8 +50,8 @@ module.exports = {
     res.redirect('/');
   },
   groupcheck: function(req, res) {
-    if(req.params.group || req.params.user) {
-      res.render('sel.jade', {groups: [], id: null, groupid: req.params.group || ('friends/' + req.params.user)});
+    if(req.params.group || req.params.user || req.params.people) {
+      res.render('sel.jade', {groups: [], id: null, groupid: req.params.group || req.params.user ? ('friends/' + req.params.user) : ('people/' + req.params.people)});
     } else {
       var id = req.signedCookies.steamID;
       if(id) {

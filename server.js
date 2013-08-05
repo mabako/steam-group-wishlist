@@ -77,6 +77,8 @@ app.get('/people/:people/:app(\\d+)', function(req, res) {
   res.render('check.jade', {group: 'people/' + req.params.people, app: req.params.app});
 });
 
+app.get('/people/:people/check', auth.groupcheck);
+
 app.get('/people/:people', function(req, res) {
   res.render('wishlist.jade', {group: 'people/' + req.params.people});
 });
